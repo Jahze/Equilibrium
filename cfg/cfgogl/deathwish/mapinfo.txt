@@ -10,12 +10,6 @@
         "tank_z_fix"        "1"
         "max_tank_z"        "1200.000000"
         "tank_warpto"       "2168.357666 5803.427734 2464.031250"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c1m2_streets"
     {
@@ -24,10 +18,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "250.000000"
         "end_dist"          "200.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-        }
     }
     "c1m3_mall"
     {
@@ -36,10 +26,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "150.000000"
         "end_dist"          "200.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-        }
     }
     "c1m4_atrium"
     {
@@ -48,10 +34,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "150.000000"
         "end_dist"          "150.000000"
-        "ItemLimits"
-        {
-            "vomitjar"      "0"
-        }
     }
     "c2m1_highway"
     {
@@ -60,12 +42,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "150.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c2m2_fairgrounds"
     {
@@ -90,12 +66,6 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "150.000000"
         "end_dist"          "250.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c2m5_concert"
     {
@@ -104,11 +74,6 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "300.000000"
         "end_dist"          "150.000000"
-        "ItemLimits"
-        {
-            "pain_pills"    "0"
-            "adrenaline"    "2"
-        }
     }
     "c3m1_plankcountry"
     {
@@ -141,11 +106,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "200.000000"
-        "ItemLimits"
-        {
-            "pain_pills"    "2"
-            "adrenaline"    "1"
-        }
     }
     "c4m1_milltown_a"
     {
@@ -154,12 +114,6 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "500.000000"
         "end_dist"          "275.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c4m2_sugarmill_a"
     {
@@ -192,11 +146,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "350.000000"
         "end_dist"          "100.000000"
-        "ItemLimits"
-        {
-            "pain_pills"    "0"
-            "adrenaline"    "2"
-        }
     }
     "c5m1_waterfront"
     {
@@ -205,12 +154,6 @@
         "start_dist"        "75.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "250.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c5m2_park"
     {
@@ -251,12 +194,6 @@
         "start_extra_dist"  "804.191406"
         "end_point"         "-4351.050293 -1135.742554 -343.968750"
         "end_dist"          "591.145630"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c5m2_darkpark"
     {
@@ -297,12 +234,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c6m2_bedlam"
     {
@@ -319,10 +250,6 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
-        "ItemLimits"
-        {
-            "vomitjar"      "0"
-        }
     }
     "c7m1_docks"
     {
@@ -331,12 +258,6 @@
         "start_dist"        "75.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c7m2_barge"
     {
@@ -361,12 +282,6 @@
         "start_extra_dist"  "605.247620"
         "end_point"         "2883.220703 2962.613037 -204.742737"
         "end_dist"          "336.442200"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c8m2_subway"
     {
@@ -410,12 +325,6 @@
         "start_extra_dist"  "587.266541"
         "end_point"         "-10784.895508 -4906.771973 318.224670"
         "end_dist"          "403.989594"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c10m2_drainage"
     {
@@ -456,12 +365,6 @@
         "start_extra_dist"  "577.638000"
         "end_point"         "5274.120605 2715.548584 88.261955"
         "end_dist"          "314.896759"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c11m2_offices"
     {
@@ -502,12 +405,6 @@
         "start_extra_dist"  "753.082764"
         "end_point"         "-6468.546387 -6767.946777 377.974670"
         "end_dist"          "275.937225"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c12m2_traintunnel"
     {
@@ -548,12 +445,6 @@
         "start_extra_dist"  "437.938110"
         "end_point"         "1186.061401 -1247.817627 389.251373"
         "end_dist"          "604.894531"
-        "ItemLimits"
-        {
-            "molotov"       "0"
-            "pipe_bomb"     "0"
-            "vomitjar"      "0"
-        }
     }
     "c13m2_southpinestream"
     {
