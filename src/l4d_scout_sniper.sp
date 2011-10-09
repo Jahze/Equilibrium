@@ -13,25 +13,33 @@ new bool:bScoutEnabled;
 new Handle:cvar_scoutEnabled;
 
 public OnPluginStart() {
+    LogMessage("[Scout] plugin start");
     cvar_scoutEnabled = CreateConVar("l4d_scout_sniper", "1", "Replace hunting rifle with scout in confogl", FCVAR_PLUGIN);
     HookConVarChange(cvar_scoutEnabled, ScoutEnabled);
+    
+    bScoutEnabled = true;
+    PluginEnable();
 }
 
 public OnPluginEnd() {
+    LogMessage("[Scout] in OnPluginEnd()");
     PluginDisable();
 }
 
 PluginDisable() {
+    LogMessage("[Scout] Disabling");
     UnhookEvent("round_start", RoundStartHook);
     UnhookEvent("spawner_give_item", SpawnerGiveItemHook);
 }
 
 PluginEnable() {
+    LogMessage("[Scout] Enabling");
     HookEvent("round_start", RoundStartHook);
     HookEvent("spawner_give_item", SpawnerGiveItemHook);
 }
 
 public ScoutEnabled( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
+    LogMessage("[Scout] in ScoutEnabled()");
     if ( StringToInt(newValue) == 0 ) {
         PluginDisable();
         bScoutEnabled = false;
@@ -51,15 +59,42 @@ IsHuntingRifle( iEntity, const String:sEntityClassName[128] ) {
     if ( StrEqual(sEntityClassName, "weapon_spawn") ) {
         new weaponID = GetEntProp(iEntity, Prop_Send, "m_weaponID");
         
+        LogMessage("[Scout] Found weapon spawn %d", weaponID);
         if ( weaponID == WEAPON_HUNTING_RIFLE_ID ) {
             return true;
         }
+    }
+    else if ( StrEqual(sEntityClassName, "weapon_hunting_rifle_spawn") ) {
+        return true;
     }
     
     return false;
 }
 
-ReplaceHuntingRifle( iEntity ) {
+ReplaceHuntingRifle( iEntity, const String:sEntityClassName[128] ) {
+    LogMessage("[Scout] Trying to replace...");
+    
+    // Static spawn
+    if ( StrEqual(sEntityClassName, "weapon_hunting_rifle_spawn") ) {
+        // Delete static spawn
+        decl Float:fOrigin[3], Float:fRotation[3];
+        GetEntPropVector(iEntity, Prop_Send, "m_vecOrigin", fOrigin);    
+        GetEntPropVector(iEntity, Prop_Send, "m_angRotation", fRotation);
+        AcceptEntityInput(iEntity, "Kill");
+        
+        // Replace with a weapon_spawn
+        iEntity = CreateEntityByName("weapon_spawn");
+        SetEntProp(iEntity, Prop_Send, "m_weaponID", WEAPON_SNIPER_SCOUT_ID);
+        SetEntityModel(iEntity, SCOUT_MDL);
+        
+        TeleportEntity(iEntity, fOrigin, fRotation, NULL_VECTOR);
+        DispatchKeyValue(iEntity, "count", "5");
+        DispatchSpawn(iEntity);
+        SetEntityMoveType(iEntity,MOVETYPE_NONE);
+        
+        return;
+    }
+    
     SetEntProp(iEntity, Prop_Send, "m_weaponID", WEAPON_SNIPER_SCOUT_ID);
     SetEntityModel(iEntity, SCOUT_MDL);
 }
@@ -69,7 +104,7 @@ DetectAndReplaceHR( iEntity ) {
     GetEdictClassname(iEntity, sEntityClassName, sizeof(sEntityClassName));
     
     if ( IsHuntingRifle(iEntity, sEntityClassName) ) {
-        ReplaceHuntingRifle(iEntity);
+        ReplaceHuntingRifle(iEntity, sEntityClassName);
     }
 }
 
@@ -78,9 +113,12 @@ public Action:RoundStartHook( Handle:event, const String:name[], bool:dontBroadc
 }
 
 public Action:RoundStartReplaceHR( Handle:timer ) {
+    LogMessage("[Scout] Round start replacements starting");
     if ( !bScoutEnabled ) {
         return;
     }
+    
+    LogMessage("[Scout] Round start replacements enabled");
     
     decl iEntity, entcount;
     entcount = GetEntityCount();
@@ -92,6 +130,8 @@ public Action:RoundStartReplaceHR( Handle:timer ) {
         
         DetectAndReplaceHR( iEntity );
     }
+    
+    LogMessage("[Scout] Round start replacements done");
 }
 
 public Action:SpawnerGiveItemHook(Handle:event, const String:name[], bool:dontBroadcast)
