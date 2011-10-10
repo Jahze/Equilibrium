@@ -13,7 +13,7 @@ new bool:bScoutEnabled;
 new Handle:cvar_scoutEnabled;
 
 public OnPluginStart() {
-    ////LogMessage("[Scout] plugin start");
+    //LogMessage("[Scout] plugin start");
     cvar_scoutEnabled = CreateConVar("l4d_scout_sniper", "1", "Replace hunting rifle with scout in confogl", FCVAR_PLUGIN);
     HookConVarChange(cvar_scoutEnabled, ScoutEnabled);
     
@@ -27,13 +27,13 @@ public OnPluginEnd() {
 }
 
 PluginDisable() {
-    ////LogMessage("[Scout] Disabling");
+    //LogMessage("[Scout] Disabling");
     UnhookEvent("round_start", RoundStartHook);
     UnhookEvent("spawner_give_item", SpawnerGiveItemHook);
 }
 
 PluginEnable() {
-    ////LogMessage("[Scout] Enabling");
+    //LogMessage("[Scout] Enabling");
     
     PreloadWeapons();
     
@@ -145,8 +145,7 @@ public Action:RoundStartReplaceHR( Handle:timer ) {
     //LogMessage("[Scout] Round start replacements done");
 }
 
-public Action:SpawnerGiveItemHook(Handle:event, const String:name[], bool:dontBroadcast)
-{
+public Action:SpawnerGiveItemHook(Handle:event, const String:name[], bool:dontBroadcast) {
     if ( !bScoutEnabled ) {
         return;
     }
