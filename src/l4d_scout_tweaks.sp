@@ -18,6 +18,16 @@ new iScoutLastWeapon    = -1;
 new iScoutLastClient    = -1;
 new String:sScoutLastWeapon[64];
 
+new iDefaultClipSize;
+
+public Plugin:myinfo =
+{
+    name        = "L4D2 Scout Tweaks",
+    author      = "Jahze",
+    version     = "0.1",
+    description = "Various tweaks to the scout sniper rifle"
+}
+
 public OnPluginStart() {
     cvar_scoutLimit = CreateConVar("l4d_scout_limit", "1", "Limits the maximum number of scouts per team", FCVAR_PLUGIN);
     HookConVarChange(cvar_scoutLimit, ScoutLimitChange);
@@ -27,30 +37,14 @@ public OnPluginStart() {
     HookEvent("player_use", ScoutPlayerUse);
     HookEvent("weapon_drop", ScoutWeaponDrop);
     
-    /*
-    if ( L4D2_IsValidWeapon("scout_sniper") ) {
-        LogMessage("[Scout Tweaks] scout_sniper");
-    }
-    
-    if ( L4D2_IsValidWeapon("sniper_scout") ) {
-        LogMessage("[Scout Tweaks] sniper_scout");
-    }
-    
-    if ( L4D2_IsValidWeapon("weapon_scout_sniper") ) {
-        LogMessage("[Scout Tweaks] weapon_scout_sniper");
-    }
-    
-    if ( L4D2_IsValidWeapon("weapon_sniper_scout") ) {
-        LogMessage("[Scout Tweaks] weapon_sniper_scout");
-    }
-    */
-    
-    LogMessage("[Scout Tweaks] Loaded...");
+    iDefaultClipSize = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize);
+    L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, 10); 
 }
 
 public OnPluginEnd() {
     UnhookEvent("player_use", ScoutPlayerUse);
     UnhookEvent("weapon_drop", ScoutWeaponDrop);
+    L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, iDefaultClipSize);
 }
 
 public ScoutLimitChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
@@ -74,24 +68,25 @@ public Action:ScoutPlayerUse( Handle:event, const String:name[], bool:dontBroadc
     decl String:weaponName[64];
     GetEdictClassname(weapon, weaponName, sizeof(weaponName));
     
+    // Player picked up a scout
     if ( StrEqual(weaponName, SCOUT_WEAPON_NAME) ) {
         if ( ScoutCount(client) >= iScoutLimit ) {
             RemovePlayerItem(client, weapon);
             PrintToChat(client, "[Deathwish] Maximum of %d scout(s) per team", iScoutLimit);
-        }
-        
-        if ( client == iScoutLastClient ) {
-            if ( IsValidEdict(iScoutLastWeapon) ) {
-                AcceptEntityInput(iScoutLastWeapon, "Kill");
-                
-                new giveFlags = GetCommandFlags("give");
-                SetCommandFlags("give", giveFlags ^ FCVAR_CHEAT);
-                
-                decl String:giveCommand[128];
-                Format(giveCommand, sizeof(giveCommand), "give %s", sScoutLastWeapon);
-                FakeClientCommand(client, giveCommand);
-                
-                SetCommandFlags("give", giveFlags);
+            
+            if ( client == iScoutLastClient ) {
+                if ( IsValidEdict(iScoutLastWeapon) ) {
+                    AcceptEntityInput(iScoutLastWeapon, "Kill");
+                    
+                    new giveFlags = GetCommandFlags("give");
+                    SetCommandFlags("give", giveFlags ^ FCVAR_CHEAT);
+                    
+                    decl String:giveCommand[128];
+                    Format(giveCommand, sizeof(giveCommand), "give %s", sScoutLastWeapon);
+                    FakeClientCommand(client, giveCommand);
+                    
+                    SetCommandFlags("give", giveFlags);
+                }
             }
         }
     }
@@ -104,12 +99,12 @@ public Action:ScoutPlayerUse( Handle:event, const String:name[], bool:dontBroadc
 ScoutCount(client) {
     new count = 0;
     
-    for ( new i = 0; i < MaxClients; i++ ) {
+    for ( new i = 1; i <= MaxClients; i++ ) {
         if ( i != client
-        && i != 0
         && IsClientConnected(i)
         && IsClientInGame(i)
-        && GetClientTeam(i) == 2 ) {
+        && GetClientTeam(i) == 2
+        && IsPlayerAlive(i) ) {
             new weapon = GetPlayerWeaponSlot(i, 0);
             if ( IsValidEdict(weapon) ) {
                 decl String:weaponName[64];
