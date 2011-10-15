@@ -25,12 +25,10 @@ public OnPluginStart() {
 
 PluginEnable() {
     HookEvent("tank_spawn", TankSpawnSlowdown);
-    LogMessage("[tank slowdown] hooked");
 }
 
 PluginDisable() {
     UnhookEvent("tank_spawn", TankSpawnSlowdown);
-    LogMessage("[tank slowdown] unhooked");
 }
 
 public TankSlowdownChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
@@ -45,7 +43,6 @@ public TankSlowdownChange( Handle:cvar, const String:oldValue[], const String:ne
 public Action:TankSpawnSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
     iTankClient = GetClientOfUserId(GetEventInt(event, "userid"));
     HookEvent("player_hurt", TankHurtSlowdown);
-    LogMessage("[tank slowdown] timer created");
 }
 
 public Action:TankHurtSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
@@ -55,7 +52,6 @@ public Action:TankHurtSlowdown( Handle:event, const String:name[], bool:dontBroa
         iTankClient = FindTank();
         
         if ( iTankClient < 0 ) {
-            LogMessage("[tank slowdown] player_hurt can't find tank");
             UnhookEvent("player_hurt", TankHurtSlowdown);
             return;
         }
