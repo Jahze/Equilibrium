@@ -7,29 +7,30 @@ const TANK_ZOMBIE_CLASS = 8;
 
 new iTankClient = -1;
 
-new Handle:timer_tankSlowdown;
 new Handle:cvar_tankSlowdown;
 
 public Plugin:myinfo = {
-    name        = "L4D Remove Tank Slowdown",
+    name        = "L4D2 Remove Tank Slowdown",
     author      = "Jahze",
     version     = "0.1",
     description = "Removes the slow down from tanks"
 };
 
 public OnPluginStart() {
-    CreateConVar("l4d_tank_slowdown", "1", "Enables/disables removal of the slow down that weapons to do tanks", FCVAR_PLUGIN);
+    cvar_tankSlowdown = CreateConVar("l4d_tank_slowdown", "1", "Enables/disables removal of the slow down that weapons to do tanks", FCVAR_PLUGIN);
     HookConVarChange(cvar_tankSlowdown, TankSlowdownChange);
+    
+    PluginEnable();
 }
 
 PluginEnable() {
     HookEvent("tank_spawn", TankSpawnSlowdown);
-    HookEvent("tank_killed", TankKilledSlowdown);
+    LogMessage("[tank slowdown] hooked");
 }
 
 PluginDisable() {
     UnhookEvent("tank_spawn", TankSpawnSlowdown);
-    UnhookEvent("tank_killed", TankKilledSlowdown);
+    LogMessage("[tank slowdown] unhooked");
 }
 
 public TankSlowdownChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
@@ -43,29 +44,28 @@ public TankSlowdownChange( Handle:cvar, const String:oldValue[], const String:ne
 
 public Action:TankSpawnSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
     iTankClient = GetClientOfUserId(GetEventInt(event, "userid"));
-    timer_tankSlowdown = CreateTimer(1.0, TankSlowdownTimer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+    HookEvent("player_hurt", TankHurtSlowdown);
+    LogMessage("[tank slowdown] timer created");
 }
 
-public Action:TankKilledSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
-    iTankClient = -1;
-    if ( timer_tankSlowdown != INVALID_HANDLE ) {
-        KillTimer(timer_tankSlowdown);
-    }
-}
-
-public Action:TankSlowdownTimer( Handle:timer ) {
+public Action:TankHurtSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
+    new victim = GetClientOfUserId(GetEventInt(event, "userid"));
+    
     if ( !IsTank(iTankClient) ) {
         iTankClient = FindTank();
         
         if ( iTankClient < 0 ) {
-            iTankClient = -1;
-            timer_tankSlowdown = INVALID_HANDLE;
-            return Plugin_Stop;
+            LogMessage("[tank slowdown] player_hurt can't find tank");
+            UnhookEvent("player_hurt", TankHurtSlowdown);
+            return;
         }
     }
     
-    SetEntProp(iTankClient, Prop_Send, "m_flLaggedMovementValue", 1.0);
-    return Plugin_Continue;
+    if ( victim != iTankClient ) {
+        return;
+    }
+    
+    SetEntPropFloat(iTankClient, Prop_Send, "m_flVelocityModifier", 1.0); 
 }
 
 FindTank() {
