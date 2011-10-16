@@ -38,6 +38,7 @@ new iBonusPoints;
 new bool:bRoundEnded;
 new bool:bSecondRound;
 new bool:bHaveFlow;
+new bool:bGettingMaxFlow;
 
 new Float:flMaxFlow;
 
@@ -83,8 +84,9 @@ public OnMapStart() {
     }
     
     iDefaultMapDistance = L4D_GetVersusMaxCompletionScore();
-    bSecondRound = false;
-    bHaveFlow    = false;
+    bSecondRound    = false;
+    bHaveFlow       = false;
+    bGettingMaxFlow = false;
     
     new scores[2];
     L4D2_GetVersusCampaignScores(scores);
@@ -266,10 +268,6 @@ public Action:DeathwishPlayerDeath( Handle:event, const String:name[], bool:dont
 }
 
 public Action:DeathwishRoundStart( Handle:event, const String:name[], bool:dontBroadcast ) {
-    CreateTimer(5.0, DeathwishRoundStartDelay);
-}
-
-public Action:DeathwishRoundStartDelay( Handle:timer ) {
     L4D_SetVersusMaxCompletionScore(0);
     
     bRoundEnded         = false;
@@ -293,15 +291,14 @@ public Action:DeathwishRoundStartDelay( Handle:timer ) {
     
     LGO_GetMapValueVector("end_point", safeRoomPos);
     */
-    
-    //CreateTimer(10.0, DeathwishGetMaxFlow, _, TIMER_REPEAT);
 }
 
 public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], bool:dontBroadcast ) {
-    if ( bHaveFlow ) {
+    if ( bGettingMaxFlow || bHaveFlow ) {
         return;
     }
     
+    bGettingMaxFlow = true;
     CreateTimer(10.0, DeathwishGetMaxFlow, _, TIMER_REPEAT);
 }
 
@@ -328,8 +325,7 @@ public Action:DeathwishGetMaxFlow( Handle:timer ) {
             GetEntPropVector(i, Prop_Send, "m_vecOrigin", vFlowPosition);
             TeleportEntity(i, safeRoomPos, NULL_VECTOR, NULL_VECTOR);
             
-            // XXX: do we need this second timer, or can we just repeat this one till we get it?
-            // Also try doing it on player_footstep, player_left_start_area or player_left_checkpoint
+            // TODO: do we need this second timer, or can we just repeat this one till we get it?
             iFlowEntity = i;
             LogMessage("[Deathwish] Teleported a common, reading his flow in 1");
             
