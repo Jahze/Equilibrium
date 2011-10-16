@@ -66,7 +66,7 @@ public OnPluginStart() {
     cvar_deathwishScoring = CreateConVar("l4d_deathwish_scoring", "0", "Changes default L4D2 scoring to deathwish style", FCVAR_PLUGIN);
     HookConVarChange(cvar_deathwishScoring, DeathwishScoringChange);
 
-    cvar_deathwishDistance = CreateConVar("l4d_deathwish_distance", "3", "Distance points a survivor can get", FCVAR_PLUGIN);
+    cvar_deathwishDistance = CreateConVar("l4d_deathwish_distance", "4", "Distance points a survivor can get", FCVAR_PLUGIN);
     HookConVarChange(cvar_deathwishDistance, DeathwishDistanceChange);
 
     iScoreTeams[L4D2Team_Survivor] = L4D2_TeamA;
@@ -185,6 +185,8 @@ GetSurvivorPoints(client) {
     new Float:flow      = L4D2_GetPlayerFlowDistance(client);
     new Float:fDistance = (flow/flMaxFlow) * (iMaxDistance);
     new iDistance       = RoundToFloor(fDistance);
+    
+    iDistance = iDistance < 0 ? 0 : iDistance;
     
     return iDistance > iMaxDistance ? iMaxDistance : iDistance;
 }
@@ -339,8 +341,8 @@ public Action:DeathwishGetMaxFlow( Handle:timer ) {
 }
 
 public Action:DeathwishReadFlow( Handle:timer ) {
-    // Maximum distance points are given at 75%
-    flMaxFlow = L4D2_GetInfectedFlowDistance(iFlowEntity)*0.75;
+    // Maximum distance points are given at 95% of flow
+    flMaxFlow = L4D2_GetInfectedFlowDistance(iFlowEntity)*0.95;
     
     TeleportEntity(iFlowEntity, vFlowPosition, NULL_VECTOR, NULL_VECTOR);
     
