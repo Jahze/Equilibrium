@@ -78,7 +78,7 @@ public OnMapStart() {
     decl mapName[128];
     
     GetCurrentMap(mapName,sizeof(mapName));
-    if ( StrContains(mapName, "m1") ) {
+    if ( StrContains(mapName, "m1") > 0 ) {
         LogMessage("[Deathwish] Detected first map resetting to 0 - 0");
         iScores[0] = 0;
         iScores[1] = 0;
@@ -100,7 +100,7 @@ public OnMapStart() {
         iScoreTeams[L4D2Team_Infected] = L4D2_TeamA;
     }
     // Scores are tied, so previous survivor team is going first
-    else if ( scores[1] == scores[0] && !StrContains(mapName, "m1") ) {
+    else if ( scores[1] == scores[0] && StrContains(mapName, "m1") < 0 ) {
         SwitchScoreTeams();
     }
     // Survivor is Team A as they have higher score
@@ -123,6 +123,7 @@ PluginEnable() {
     HookEvent("player_left_start_area", DeathwishPlayerLeftStartArea);
     
     timer_setScores = CreateTimer(3.0, DeathwishSetScores, _, TIMER_REPEAT);
+    LogMessage("[Deathwish] Plugin enabled");
 }
 
 PluginDisable() {
@@ -135,6 +136,7 @@ PluginDisable() {
     L4D_SetVersusMaxCompletionScore(iDefaultMapDistance);
     
     KillTimer(timer_setScores);
+    LogMessage("[Deathwish] Plugin disabled");
 }
 
 PrepSDKCalls() {
@@ -291,6 +293,7 @@ public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], b
         return;
     }
     
+    LogMessage("[Deathwish] Getting max flow");
     bGettingMaxFlow = true;
     CreateTimer(10.0, DeathwishGetMaxFlow, _, TIMER_REPEAT);
 }
