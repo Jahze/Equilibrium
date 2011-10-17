@@ -3,7 +3,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <left4downtown>
-//#include <confogl>
+#include <mapinfo>
 
 static const String:DEATHWISH_GAMEDATA[]        = "deathwish";
 
@@ -29,7 +29,7 @@ new iFlowEntity;
 new Float:vFlowPosition[3];
 
 new iDefaultMapDistance;
-new iMaxDistance = 3;
+new iMaxDistance = 4;
 new iScores[2];
 new iScoreTeams[4];
 new iSurvivorScores[4];
@@ -59,6 +59,8 @@ public Plugin:myinfo = {
 
 // Things to consider:
 //  - tank + witch = bonus points
+//  - use AreTeamsFlipped() (see srsmod)
+//  - Remove timer for getting flow
 
 public OnPluginStart() {
     PrepSDKCalls();
@@ -121,7 +123,7 @@ PluginEnable() {
     HookEvent("door_close", DeathwishDoorClose);
     HookEvent("player_left_start_area", DeathwishPlayerLeftStartArea);
     
-    timer_setScores = CreateTimer(1.5, DeathwishSetScores, _, TIMER_REPEAT);
+    timer_setScores = CreateTimer(3.0, DeathwishSetScores, _, TIMER_REPEAT);
 }
 
 PluginDisable() {
@@ -183,7 +185,8 @@ static Float:L4D2_GetPlayerFlowDistance( client ) {
 
 GetSurvivorPoints(client) {
     new Float:flow      = L4D2_GetPlayerFlowDistance(client);
-    new Float:fDistance = (flow/flMaxFlow) * (iMaxDistance);
+    new Float:fMax      = iMaxDistance;
+    new Float:fDistance = (flow/flMaxFlow) * fMax;
     new iDistance       = RoundToFloor(fDistance);
     
     iDistance = iDistance < 0 ? 0 : iDistance;
@@ -200,6 +203,7 @@ CalculateScores() {
             new currentPoints = GetSurvivorPoints(i);
             if ( currentPoints > iSurvivorScores[index] ) {
                 iSurvivorScores[index] = currentPoints;
+                PrintToChat(i, "[Deathwith] You have received a distance point for reaching %d%%.", currentPoints*25); 
             }
         }
     }
@@ -282,17 +286,6 @@ public Action:DeathwishRoundStart( Handle:event, const String:name[], bool:dontB
     if ( bSecondRound ) {
         SwitchScoreTeams();
     }
-    
-    /*
-    if ( LGO_IsMapDataAvailable() ) {
-        LogMessage("[Deathwish] Have mapinfo");
-    }
-    else {
-        LogMessage("[Deathwish] Don't have mapinfo");
-    }
-    
-    LGO_GetMapValueVector("end_point", safeRoomPos);
-    */
 }
 
 public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], bool:dontBroadcast ) {
@@ -309,10 +302,14 @@ public Action:DeathwishGetMaxFlow( Handle:timer ) {
     decl String:entityClass[128];
     new iMaxEntities = GetMaxEntities();
     
-    // Set to HR 1 end point
-    safeRoomPos[0] = 3993.458008;
-    safeRoomPos[1] = -1598.952271;
-    safeRoomPos[2] = 294.281250;
+    if ( !LGO_IsMapDataAvailable() ) {
+        LogMessage("[Deathwish] Don't have mapinfo!!!");
+        flMaxFlow = 99999.0;
+        return Plugin_Stop;
+    }
+    
+    LGO_GetMapValueVector("end_point", safeRoomPos);
+    LogMessage("[Deathwish] safe room is at %f, %f", safeRoomPos[0], safeRoomPos[1]);
     
     for ( new i = MaxClients+1; i <= iMaxEntities; i++ ) {
         if ( !IsValidEntity(i) ) {
@@ -327,7 +324,6 @@ public Action:DeathwishGetMaxFlow( Handle:timer ) {
             GetEntPropVector(i, Prop_Send, "m_vecOrigin", vFlowPosition);
             TeleportEntity(i, safeRoomPos, NULL_VECTOR, NULL_VECTOR);
             
-            // TODO: do we need this second timer, or can we just repeat this one till we get it?
             iFlowEntity = i;
             LogMessage("[Deathwish] Teleported a common, reading his flow in 1");
             
