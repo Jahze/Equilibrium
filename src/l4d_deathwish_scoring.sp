@@ -53,7 +53,7 @@ new Handle:timer_setScores;
 public Plugin:myinfo = {
     name        = "L4D2 Deathwish Scoring",
     author      = "Jahze",
-    version     = "0.1",
+    version     = "1.0",
     description = "Changes default L4D2 scoring to deathwish style"
 };
 
@@ -64,12 +64,14 @@ public Plugin:myinfo = {
 public OnPluginStart() {
     PrepSDKCalls();
     
-    cvar_deathwishScoring = CreateConVar("l4d_deathwish_scoring", "0", "Changes default L4D2 scoring to deathwish style", FCVAR_PLUGIN);
+    cvar_deathwishScoring = CreateConVar("l4d_deathwish_scoring", "1", "Changes default L4D2 scoring to deathwish style", FCVAR_PLUGIN);
     HookConVarChange(cvar_deathwishScoring, DeathwishScoringChange);
 
     cvar_deathwishDistance = CreateConVar("l4d_deathwish_distance", "4", "Distance points a survivor can get", FCVAR_PLUGIN);
     HookConVarChange(cvar_deathwishDistance, DeathwishDistanceChange);
 
+    PluginEnable();
+    
     iScoreTeams[L4D2Team_Survivor] = L4D2_TeamA;
     iScoreTeams[L4D2Team_Infected] = L4D2_TeamB;    
 }
