@@ -60,7 +60,6 @@ public Plugin:myinfo = {
 // Things to consider:
 //  - tank + witch = bonus points
 //  - use AreTeamsFlipped() (see srsmod)
-//  - Remove timer for getting flow
 
 public OnPluginStart() {
     PrepSDKCalls();
@@ -185,8 +184,7 @@ static Float:L4D2_GetPlayerFlowDistance( client ) {
 
 GetSurvivorPoints(client) {
     new Float:flow      = L4D2_GetPlayerFlowDistance(client);
-    new Float:fMax      = iMaxDistance;
-    new Float:fDistance = (flow/flMaxFlow) * fMax;
+    new Float:fDistance = (flow/flMaxFlow) * (iMaxDistance);
     new iDistance       = RoundToFloor(fDistance);
     
     iDistance = iDistance < 0 ? 0 : iDistance;
@@ -203,7 +201,7 @@ CalculateScores() {
             new currentPoints = GetSurvivorPoints(i);
             if ( currentPoints > iSurvivorScores[index] ) {
                 iSurvivorScores[index] = currentPoints;
-                PrintToChat(i, "[Deathwith] You have received a distance point for reaching %d%%.", currentPoints*25); 
+                PrintToChat(i, "[Deathwish] You have received a distance point for reaching %d%%.", currentPoints*25); 
             }
         }
     }
@@ -344,11 +342,14 @@ public Action:DeathwishReadFlow( Handle:timer ) {
     
     LogMessage("[Deathwish] Maximum flow: %f", flMaxFlow);
     
-    if ( flMaxFlow < 2000.0 ) {
+    // XXX: is this too much?
+    if ( flMaxFlow < 10000.0 ) {
         LogMessage("[Deathwish] Flow is too low! Restarting flow timer");
         CreateTimer(5.0, DeathwishGetMaxFlow, _, TIMER_REPEAT);
     }
-    bHaveFlow = true;
+    else {
+        bHaveFlow = true;
+    }
 }
 
 public Action:DeathwishRoundEnd( Handle:event, const String:name[], bool:dontBroadcast ) {
