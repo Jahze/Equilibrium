@@ -78,7 +78,7 @@ public OnMapStart() {
     decl mapName[128];
     
     GetCurrentMap(mapName,sizeof(mapName));
-    if ( StrContains(mapName, "m1") > 0 ) {
+    if ( StrContains(mapName, "m1") != -1 ) {
         LogMessage("[Deathwish] Detected first map resetting to 0 - 0");
         iScores[0] = 0;
         iScores[1] = 0;
