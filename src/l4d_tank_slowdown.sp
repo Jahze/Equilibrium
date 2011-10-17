@@ -43,7 +43,7 @@ public TankSlowdownChange( Handle:cvar, const String:oldValue[], const String:ne
 public Action:TankSpawnSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
     iTankClient = GetClientOfUserId(GetEventInt(event, "userid"));
     HookEvent("player_hurt", TankHurtSlowdown);
-    SetConVarInt(GetConVar("sv_tankpropfade"), 0);
+    SetConVarInt(FindConVar("sv_tankpropfade"), 0);
 }
 
 public Action:TankHurtSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
@@ -54,7 +54,7 @@ public Action:TankHurtSlowdown( Handle:event, const String:name[], bool:dontBroa
         
         if ( iTankClient < 0 ) {
             UnhookEvent("player_hurt", TankHurtSlowdown);
-            SetConVarInt(GetConVar("sv_tankpropfade"), 1);
+            SetConVarInt(FindConVar("sv_tankpropfade"), 1);
             return;
         }
     }
