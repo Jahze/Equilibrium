@@ -12,8 +12,8 @@ new Handle:cvar_tankSlowdown;
 public Plugin:myinfo = {
     name        = "L4D2 Remove Tank Slowdown",
     author      = "Jahze",
-    version     = "0.2",
-    description = "Removes the slow down from tanks and some other buffs"
+    version     = "0.1",
+    description = "Removes the slow down from tanks"
 };
 
 public OnPluginStart() {
@@ -43,7 +43,6 @@ public TankSlowdownChange( Handle:cvar, const String:oldValue[], const String:ne
 public Action:TankSpawnSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
     iTankClient = GetClientOfUserId(GetEventInt(event, "userid"));
     HookEvent("player_hurt", TankHurtSlowdown);
-    SetConVarInt(FindConVar("sv_tankpropfade"), 0);
 }
 
 public Action:TankHurtSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
@@ -54,7 +53,6 @@ public Action:TankHurtSlowdown( Handle:event, const String:name[], bool:dontBroa
         
         if ( iTankClient < 0 ) {
             UnhookEvent("player_hurt", TankHurtSlowdown);
-            SetConVarInt(FindConVar("sv_tankpropfade"), 1);
             return;
         }
     }
