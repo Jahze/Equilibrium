@@ -21,7 +21,9 @@ static Float:fLocTemp[MAXPLAYERS][3];
 
 BuildConfigPath(String:buffer[], maxlength, const String:sFileName[])
 {
-    Format(buffer, maxlength, "../../cfg/cfgogl/deathwish/%s", sFileName);
+    decl String:PathToSM[PLATFORM_MAX_PATH];
+    BuildPath(Path_SM, PathToSM, sizeof(PathToSM), "../../cfg/cfgogl/deathwish");
+    Format(buffer, maxlength, "%s/%s", PathToSM, sFileName);
 }
 
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
@@ -31,7 +33,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	return APLRes_Success;
 }
 
-public MI_OnModuleStart()
+public OnPluginStart()
 {
 	MI_KV_Load();
 	
@@ -52,12 +54,12 @@ MI_APL()
 	CreateNative("LGO_CopyMapSubsection", _native_CopyMapSubsection);
 }
 
-public MI_OnMapStart()
+public OnMapStart()
 {
 	MI_KV_UpdateMapInfo();
 }
 
-public MI_OnMapEnd()
+public OnMapEnd()
 {
 	KvRewind(kMIData);
 	MapDataAvailable = false;
