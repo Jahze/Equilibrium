@@ -90,6 +90,8 @@ native LGO_GetMapValueString(const String:key[], String:value[], maxlength, cons
  */
 native LGO_CopyMapSubsection(Handle:kv, const String:section[]);
 
+native LGO_IsEntityInSaferoom(entity, saferoom);
+
 public SharedPlugin:__pl_mapinfo = 
 {
 	name = "mapinfo",
@@ -110,7 +112,8 @@ public __pl_mapinfo_SetNTVOptional()
 	MarkNativeAsOptional("LGO_GetMapValueFloat");
 	MarkNativeAsOptional("LGO_GetMapValueVector");
 	MarkNativeAsOptional("LGO_GetMapValueString");
-	MarkNativeAsOptional("LGO_CopyMapSubsection");	
+	MarkNativeAsOptional("LGO_CopyMapSubsection");
+	MarkNativeAsOptional("LGO_IsEntityInSaferoom");
 }
 
 	

@@ -6,6 +6,9 @@
 
 #define DEBUG_MI					0
 
+const	START_SAFEROOM			= 1 << 0;
+const	END_SAFEROOM			= 1 << 1;
+
 new Handle:kMIData = INVALID_HANDLE;
 
 static bool:MapDataAvailable;
@@ -52,6 +55,7 @@ MI_APL()
 	CreateNative("LGO_GetMapValueVector", _native_GetMapValueVector);
 	CreateNative("LGO_GetMapValueString", _native_GetMapValueString);
 	CreateNative("LGO_CopyMapSubsection", _native_CopyMapSubsection);
+	CreateNative("LGO_IsEntityInSaferoom", _native_IsEntityInSaferoom);
 }
 
 public OnMapStart()
@@ -486,3 +490,14 @@ public _native_CopyMapSubsection(Handle:plugin, numParams)
 	
 	CopyMapSubsection(kv, key);
 }
+
+public _native_IsEntityInSaferoom(Handle:plugin, numParams)
+{	
+	decl entity, saferoom;
+	
+	entity = GetNativeCell(1);
+	saferoom = GetNativeCell(2);
+	
+	return IsEntityInSaferoom(entity, saferoom);
+}
+
