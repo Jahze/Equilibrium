@@ -42,6 +42,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "150.000000"
+        "max_flow"          "27271.470703"
     }
     "c2m2_fairgrounds"
     {
@@ -50,6 +51,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "150.000000"
+        "max_flow"          "28892.052734"
     }
     "c2m3_coaster"
     {
@@ -58,6 +60,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "150.000000"
+        "max_flow"          "32335.757812"
     }
     "c2m4_barns"
     {
@@ -66,6 +69,7 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "150.000000"
         "end_dist"          "250.000000"
+        "max_flow"          "20512.228515"
     }
     "c2m5_concert"
     {
@@ -74,6 +78,7 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "300.000000"
         "end_dist"          "150.000000"
+        "max_flow"          "5759.506835"
     }
     "c3m1_plankcountry"
     {
@@ -114,6 +119,7 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "500.000000"
         "end_dist"          "275.000000"
+        "max_flow"          "17942.914062"
     }
     "c4m2_sugarmill_a"
     {
@@ -122,6 +128,7 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "250.000000"
         "end_dist"          "150.000000"
+        "max_flow"          "26095.123046"
     }
     "c4m3_sugarmill_b"
     {
@@ -130,6 +137,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "300.000000"
+        "max_flow"          "21710.488281"
     }
     "c4m4_milltown_b"
     {
@@ -138,6 +146,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "275.000000"
         "end_dist"          "200.000000"
+        "max_flow"          "13300.472656"
     }
     "c4m5_milltown_escape"
     {
@@ -146,6 +155,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "350.000000"
         "end_dist"          "100.000000"
+        "max_flow"          "3479.585937"
     }
     "c5m1_waterfront"
     {
@@ -154,6 +164,7 @@
         "start_dist"        "75.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "250.000000"
+        "max_flow"          "9750.531250"
     }
     "c5m2_park"
     {
@@ -162,6 +173,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "250.000000"
+        "max_flow"          "26830.240234"
     }
     "c5m3_cemetery"
     {
@@ -170,6 +182,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "250.000000"
+        "max_flow"          "32848.285156"
     }
     "c5m4_quarter"
     {
@@ -178,6 +191,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "350.000000"
+        "max_flow"          "27562.847656"
     }
     "c5m5_bridge"
     {
@@ -186,6 +200,7 @@
         "start_extra_dist"  "264.157257"
         "end_point"         "3001.944092 6272.879395 494.284149"
         "end_dist"          "130.807541"
+        "max_flow"          "15840.828125"
     }
     "c5m1_darkwaterfront"
     {

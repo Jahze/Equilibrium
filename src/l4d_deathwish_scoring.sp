@@ -24,21 +24,17 @@ enum L4D2LogicalTeam {
     L4D2_TeamB = 1
 }
 
-// For common to find max flow
-new iFlowEntity;
-new Float:vFlowPosition[3];
-
 new iDefaultMapDistance;
 new iMaxDistance = 4;
 new iScores[2];
+new iLastScores[2];
 new iScoreTeams[4];
 new iSurvivorScores[4];
 new iBonusPoints;
 
 new bool:bRoundEnded;
 new bool:bSecondRound;
-new bool:bHaveFlow;
-new bool:bGettingMaxFlow;
+new bool:bRoundStarted;
 
 new Float:flMaxFlow;
 
@@ -49,6 +45,8 @@ new Handle:fPlayerGetFlowDistance;
 new Handle:fGetInfFlowDistance;
 
 new Handle:timer_setScores;
+
+new Handle:scoresHUD;
 
 public Plugin:myinfo = {
     name        = "L4D2 Deathwish Scoring",
@@ -72,6 +70,9 @@ public OnPluginStart() {
 
     PluginEnable();
     
+    //RegConsoleCmd("saferoom", TeleportToSaferoom, "Teleports a player to the saferoom");
+    //RegConsoleCmd("myflow", PrintFlowToClient, "Prints a player's flow to them");
+    
     iScoreTeams[L4D2Team_Survivor] = L4D2_TeamA;
     iScoreTeams[L4D2Team_Infected] = L4D2_TeamB;    
 }
@@ -84,17 +85,19 @@ public OnMapStart() {
         LogMessage("[Deathwish] Detected first map resetting to 0 - 0");
         iScores[0] = 0;
         iScores[1] = 0;
+        iLastScores[0] = 0;
+        iLastScores[1] = 0;
     }
     
+    flMaxFlow           = LGO_GetMapValueFloat("max_flow")*0.95;
     iDefaultMapDistance = L4D_GetVersusMaxCompletionScore();
-    bSecondRound    = false;
-    bHaveFlow       = false;
-    bGettingMaxFlow = false;
+    bSecondRound        = false;
+    bRoundStarted       = false;
     
     new scores[2];
     L4D2_GetVersusCampaignScores(scores);
     
-    LogMessage("[Deathwish] map start, scores are: %d - %d", scores[0], scores[1]);
+    LogMessage("[Deathwish] map start, scores are: %d - %d (max flow: %f)", scores[0], scores[1], flMaxFlow);
     
     // If team B's score is higher then they must be survivor
     if ( scores[1] > scores[0] ) {
@@ -210,9 +213,9 @@ CalculateScores() {
         }
     }
     
-    iScores[iScoreTeams[L4D2Team_Survivor]] = iSurvivorScores[0]
-        + iSurvivorScores[1] + iSurvivorScores[2] + iSurvivorScores[3]
-        + iBonusPoints;
+    iScores[iScoreTeams[L4D2Team_Survivor]] = iLastScores[iScoreTeams[L4D2Team_Survivor]]
+        + iSurvivorScores[0] + iSurvivorScores[1] + iSurvivorScores[2]
+        + iSurvivorScores[3] + iBonusPoints;
 }
 
 PrintFlows() {
@@ -291,79 +294,20 @@ public Action:DeathwishRoundStart( Handle:event, const String:name[], bool:dontB
 }
 
 public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], bool:dontBroadcast ) {
-    if ( bGettingMaxFlow || bHaveFlow ) {
-        return;
-    }
-    
-    LogMessage("[Deathwish] Getting max flow");
-    bGettingMaxFlow = true;
-    CreateTimer(10.0, DeathwishGetMaxFlow, _, TIMER_REPEAT);
-}
-
-public Action:DeathwishGetMaxFlow( Handle:timer ) {
-    new Float:safeRoomPos[3];
-    decl String:entityClass[128];
-    new iMaxEntities = GetMaxEntities();
-    
-    if ( !LGO_IsMapDataAvailable() ) {
-        LogMessage("[Deathwish] Don't have mapinfo!!!");
-        flMaxFlow = 99999.0;
-        return Plugin_Stop;
-    }
-    
-    LGO_GetMapValueVector("end_point", safeRoomPos);
-    LogMessage("[Deathwish] safe room is at %f, %f", safeRoomPos[0], safeRoomPos[1]);
-    
-    for ( new i = MaxClients+1; i <= iMaxEntities; i++ ) {
-        if ( !IsValidEntity(i) ) {
-            continue;
-        }
-        
-        GetEdictClassname(i, entityClass, sizeof(entityClass));
-        
-        // Commandeer a common to do our bidding
-        if ( StrEqual(entityClass, INFECTED_CLASS, .caseSensitive = false) ) {
-            // Move him to the safe room and read his flow
-            GetEntPropVector(i, Prop_Send, "m_vecOrigin", vFlowPosition);
-            TeleportEntity(i, safeRoomPos, NULL_VECTOR, NULL_VECTOR);
-            
-            iFlowEntity = i;
-            LogMessage("[Deathwish] Teleported a common, reading his flow in 1");
-            
-            CreateTimer(1.0, DeathwishReadFlow);
-            return Plugin_Stop;
-        }
-    }
-    
-    LogMessage("[Deathwish] Couldn't find a common to commandeer!");
-    return Plugin_Continue;
-}
-
-public Action:DeathwishReadFlow( Handle:timer ) {
-    // Maximum distance points are given at 95% of flow
-    flMaxFlow = L4D2_GetInfectedFlowDistance(iFlowEntity)*0.95;
-    
-    TeleportEntity(iFlowEntity, vFlowPosition, NULL_VECTOR, NULL_VECTOR);
-    
-    LogMessage("[Deathwish] Maximum flow: %f", flMaxFlow);
-    
-    // XXX: is this too much?
-    if ( flMaxFlow < 10000.0 ) {
-        LogMessage("[Deathwish] Flow is too low! Restarting flow timer");
-        CreateTimer(5.0, DeathwishGetMaxFlow, _, TIMER_REPEAT);
-    }
-    else {
-        bHaveFlow = true;
-    }
+    bRoundStarted = true;
 }
 
 public Action:DeathwishRoundEnd( Handle:event, const String:name[], bool:dontBroadcast ) {
     // Read in scores for survival bonus
-    L4D2_GetVersusCampaignScores(iScores);
+    L4D2_GetVersusCampaignScores(iLastScores);
+    
+    iScores[0] = iLastScores[0];
+    iScores[1] = iLastScores[1];
     
     LogMessage("[Deathwish] round end, scores are: %d - %d", iScores[0], iScores[1]);
     
     bSecondRound = true;
+    bRoundStarted = false;
     bRoundEnded = true;
 }
 
@@ -375,11 +319,46 @@ public Action:DeathwishDoorClose( Handle:event, const String:name[], bool:dontBr
 }
 
 public Action:DeathwishSetScores( Handle:timer ) {
-    if ( bHaveFlow && !bRoundEnded ) {
+    if ( bRoundStarted && !bRoundEnded ) {
         CalculateScores();
         L4D2_SetVersusCampaignScores(iScores);
+        RedrawHUD();
     }
     
     return Plugin_Continue;
 }
 
+RedrawHUD() {
+    if ( scoresHUD != INVALID_HANDLE ) {
+        CloseHandle(scoresHUD);
+    }
+    
+    scoresHUD = CreatePanel();
+    
+    decl String:scoresString[64];
+    Format(scoresString, sizeof(scoresString), "%d - %d", iScores[0], iScores[1]);
+    DrawPanelText(scoresHUD, scoresString);
+    
+    for ( new client = 1; client <= MaxClients; client++ ) {
+        if ( IsClientInGame(client) && !IsFakeClient(client) ) {
+            SendPanelToClient(scoresHUD, client, MenuHandlerHUD, 3);
+        }
+    }
+}
+
+public MenuHandlerHUD( Handle:menu, MenuAction:action, param1, param2 ) {
+}
+
+public Action:TeleportToSaferoom(client, args) {
+    new Float:safeRoomPos[3];
+    
+    LGO_GetMapValueVector("end_point", safeRoomPos);
+    TeleportEntity(client, safeRoomPos, NULL_VECTOR, NULL_VECTOR);
+}
+
+public Action:PrintFlowToClient(client, args) {
+    decl String:flow[128];
+    
+    Format(flow, sizeof(flow), "[Deathwish] Your flow is %f.", L4D2_GetPlayerFlowDistance(client));
+    ReplyToCommand(client, flow);
+}
