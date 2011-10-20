@@ -42,6 +42,7 @@ public TankSlowdownChange( Handle:cvar, const String:oldValue[], const String:ne
 
 public Action:TankSpawnSlowdown( Handle:event, const String:name[], bool:dontBroadcast ) {
     iTankClient = GetClientOfUserId(GetEventInt(event, "userid"));
+    // XXX: if tank is in play don't need to hook again probably
     HookEvent("player_hurt", TankHurtSlowdown);
 }
 
