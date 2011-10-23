@@ -23,6 +23,10 @@ public OnPluginStart() {
     PluginEnable();
 }
 
+public OnPluginEnd() {
+    PluginDisable();
+}
+
 PluginEnable() {
     HookEvent("tank_spawn", TankSpawnSlowdown);
 }
