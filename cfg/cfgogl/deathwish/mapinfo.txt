@@ -10,6 +10,7 @@
         "tank_z_fix"        "1"
         "max_tank_z"        "1200.000000"
         "tank_warpto"       "2168.357666 5803.427734 2464.031250"
+        "max_flow"          "16083.604492"
     }
     "c1m2_streets"
     {
@@ -18,6 +19,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "250.000000"
         "end_dist"          "200.000000"
+        "max_flow"          "29798.435546"
     }
     "c1m3_mall"
     {
@@ -26,6 +28,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "150.000000"
         "end_dist"          "200.000000"
+        "max_flow"          "27056.511718"
     }
     "c1m4_atrium"
     {
@@ -34,6 +37,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "150.000000"
         "end_dist"          "150.000000"
+        "max_flow"          "3966.980957"
     }
     "c2m1_highway"
     {
@@ -87,6 +91,7 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "200.000000"
+        "max_flow"          "21771.443359"
     }
     "c3m2_swamp"
     {
@@ -95,6 +100,7 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "200.000000"
+        "max_flow"          "22928.333984"
     }
     "c3m3_shantytown"
     {
@@ -103,6 +109,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "200.000000"
+        "max_flow"          "18276.041015"
     }
     "c3m4_plantation"
     {
@@ -111,6 +118,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "200.000000"
+        "max_flow"          "12348.765625"
     }
     "c4m1_milltown_a"
     {
@@ -249,6 +257,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
+        "max_flow"          "25205.873046"
     }
     "c6m2_bedlam"
     {
@@ -257,6 +266,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
+        "max_flow"          "33223.320312"
     }
     "c6m3_port"
     {
@@ -265,6 +275,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
+        "max_flow"          "3972.954833"
     }
     "c7m1_docks"
     {
@@ -273,6 +284,7 @@
         "start_dist"        "75.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
+        "max_flow"          "27957.693359"
     }
     "c7m2_barge"
     {
@@ -281,6 +293,7 @@
         "start_dist"        "75.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "50.000000"
+        "max_flow"          "32216.033203"
     }
     "c7m3_port"
     {
@@ -289,6 +302,7 @@
         "start_dist"        "75.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "75.000000"
+        "max_flow"          "4326.162597"
     }
     "c8m1_apartment"
     {
@@ -297,6 +311,7 @@
         "start_extra_dist"  "605.247620"
         "end_point"         "2883.220703 2962.613037 -204.742737"
         "end_dist"          "336.442200"
+        "max_flow"          "11435.919921"
     }
     "c8m2_subway"
     {
@@ -305,6 +320,7 @@
         "start_extra_dist"  "323.406708"
         "end_point"         "11008.688477 4657.793945 49.151138"
         "end_dist"          "180.738693"
+        "max_flow"          "20226.613281"
     }
     "c8m3_sewers"
     {
@@ -313,6 +329,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "0.000000"
         "end_dist"          "75.000000"
+        "max_flow"          "22480.982421"
     }
     "c8m4_interior"
     {
@@ -324,6 +341,7 @@
         "tank_z_fix"        "1"
         "max_tank_z"        "4000.000000"
         "tank_warpto"       "13428.627930 15072.313477 486.031250"
+        "max_flow"          "20491.814453"
     }
     "c8m5_rooftop"
     {
@@ -332,6 +350,7 @@
         "start_extra_dist"  "421.803650"
         "end_point"         "5675.121582 8443.446289 6142.031250"
         "end_dist"          "100.000000"
+        "max_flow"          "6096.897460"
     }
     "c10m1_caves"
     {
@@ -340,6 +359,7 @@
         "start_extra_dist"  "587.266541"
         "end_point"         "-10784.895508 -4906.771973 318.224670"
         "end_dist"          "403.989594"
+        "max_flow"          "16164.799804"
     }
     "c10m2_drainage"
     {
@@ -348,6 +368,7 @@
         "start_extra_dist"  "399.942505"
         "end_point"         "-8339.282227 -5592.915039 0.031253"
         "end_dist"          "322.081451"
+        "max_flow"          "15466.611328"
     }
     "c10m3_ranchhouse"
     {
@@ -356,6 +377,7 @@
         "start_extra_dist"  "327.413300"
         "end_point"         "-2673.776611 107.736259 316.727081"
         "end_dist"          "327.768036"
+        "max_flow"          "19623.562500"
     }
     "c10m4_mainstreet"
     {
@@ -364,6 +386,7 @@
         "start_extra_dist"  "307.155029"
         "end_point"         "1309.379883 -5479.276367 -26.821182"
         "end_dist"          "324.451355"
+        "max_flow"          "23242.669921"
     }
     "c10m5_houseboat"
     {
@@ -372,6 +395,7 @@
         "start_extra_dist"  "317.183868"
         "end_point"         "3792.103271 -4653.910645 -151.968750"
         "end_dist"          "758.440063"
+        "max_flow"          "11289.250976"
     }
     "c11m1_greenhouse"
     {
@@ -380,6 +404,7 @@
         "start_extra_dist"  "577.638000"
         "end_point"         "5274.120605 2715.548584 88.261955"
         "end_dist"          "314.896759"
+        "max_flow"          "10212.381835"
     }
     "c11m2_offices"
     {
@@ -388,6 +413,7 @@
         "start_extra_dist"  "333.408081"
         "end_point"         "7934.695801 6070.557617 48.318222"
         "end_dist"          "310.929138"
+        "max_flow"          "22238.673828"
     }
     "c11m3_garage"
     {
@@ -396,6 +422,7 @@
         "start_extra_dist"  "304.760986"
         "end_point"         "-343.016815 3583.830566 332.031250"
         "end_dist"          "187.318344"
+        "max_flow"          "24937.748046"
     }
     "c11m4_terminal"
     {
@@ -404,6 +431,7 @@
         "start_extra_dist"  "206.287918"
         "end_point"         "3276.041992 4504.324707 181.974670"
         "end_dist"          "343.399078"
+        "max_flow"          "18663.025390"
     }
     "c11m5_runway"
     {
@@ -412,6 +440,7 @@
         "start_extra_dist"  "344.831299"
         "end_point"         "-5196.772949 9229.695312 -191.968750"
         "end_dist"          "538.437988"
+        "max_flow"          "3962.237792"
     }
     "c12m1_hilltop"
     {
@@ -420,6 +449,7 @@
         "start_extra_dist"  "753.082764"
         "end_point"         "-6468.546387 -6767.946777 377.974670"
         "end_dist"          "275.937225"
+        "max_flow"          "13913.914062"
     }
     "c12m2_traintunnel"
     {
@@ -428,6 +458,7 @@
         "start_extra_dist"  "270.500549"
         "end_point"         "-870.702148 -10408.813477 -63.968750"
         "end_dist"          "261.087494"
+        "max_flow"          "14591.819335"
     }
     "c12m3_bridge"
     {
@@ -436,6 +467,7 @@
         "start_extra_dist"  "264.843231"
         "end_point"         "7754.335938 -11443.834961 440.031250"
         "end_dist"          "264.020966"
+        "max_flow"          "17830.804687"
     }
     "c12m4_barn"
     {
@@ -444,6 +476,7 @@
         "start_extra_dist"  "264.932068"
         "end_point"         "10398.775391 -310.353424 2.031253"
         "end_dist"          "316.505157"
+        "max_flow"          "15492.066406"
     }
     "c12m5_cornfield"
     {
@@ -452,6 +485,7 @@
         "start_extra_dist"  "315.198547"
         "end_point"         "6972.038086 1354.824463 274.312256"
         "end_dist"          "183.031281"
+        "max_flow"          "11546.320312"
     }
     "c13m1_alpinecreek"
     {
@@ -460,6 +494,7 @@
         "start_extra_dist"  "437.938110"
         "end_point"         "1186.061401 -1247.817627 389.251373"
         "end_dist"          "604.894531"
+        "max_flow"          "12625.808593"
     }
     "c13m2_southpinestream"
     {
@@ -468,6 +503,7 @@
         "start_extra_dist"  "604.901245"
         "end_point"         "470.932892 8823.397461 -368.968750"
         "end_dist"          "324.996063"
+        "max_flow"          "24374.105468"
     }
     "c13m3_memorialbridge"
     {
@@ -476,6 +512,7 @@
         "start_extra_dist"  "321.877747"
         "end_point"         "6097.708496 -6337.365234 422.031250"
         "end_dist"          "356.709808"
+        "max_flow"          "24115.087890"
     }
     "c13m4_cutthroatcreek"
     {
@@ -484,5 +521,6 @@
         "start_extra_dist"  "349.184357"
         "end_point"         "-1823.846191 -1815.961670 -250.417389"
         "end_dist"          "254.989624"
+        "max_flow"          "10894.387695"
     }
 }
