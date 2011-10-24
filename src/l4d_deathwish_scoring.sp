@@ -12,6 +12,8 @@ static const String:INFECTED_CLASS[]            = "infected";
 static const String:PLAYER_FLOW_FUNCTION[]      = "CTerrorPlayer_GetFlowDistance";
 static const String:INFECTED_FLOW_FUNCTION[]    = "Infected_GetFlowDistance";
 
+const TANK_ZOMBIE_CLASS                         = 8;
+
 enum L4D2Team {
     L4D2Team_Unknown    = 0,
     L4D2Team_Spectator  = 1,
@@ -25,21 +27,28 @@ enum L4D2LogicalTeam {
 }
 
 new iDefaultMapDistance;
-new iMaxDistance = 4;
+new iMaxDistance = 10;
 new iScores[2];
 new iLastScores[2];
 new iScoreTeams[4];
-new iSurvivorScores[4];
 new iBonusPoints;
+
+new iSurvivorScores[4];
+new iSurvivorLastDistance[4];
+new iSurvivalBonuses[4];
 
 new bool:bRoundEnded;
 new bool:bSecondRound;
 new bool:bRoundStarted;
+new bool:bTankAlive;
 
 new Float:flMaxFlow;
+new iTankFlow;
+new iSaferoomDoor;
 
 new Handle:cvar_deathwishScoring;
 new Handle:cvar_deathwishDistance;
+new Handle:cvar_survivalBonus;
 
 new Handle:fPlayerGetFlowDistance;
 new Handle:fGetInfFlowDistance;
@@ -57,7 +66,6 @@ public Plugin:myinfo = {
 
 // Things to consider:
 //  - tank + witch = bonus points
-//  - use AreTeamsFlipped() (see srsmod)
 
 public OnPluginStart() {
     PrepSDKCalls();
@@ -65,16 +73,22 @@ public OnPluginStart() {
     cvar_deathwishScoring = CreateConVar("l4d_deathwish_scoring", "1", "Changes default L4D2 scoring to deathwish style", FCVAR_PLUGIN);
     HookConVarChange(cvar_deathwishScoring, DeathwishScoringChange);
 
-    cvar_deathwishDistance = CreateConVar("l4d_deathwish_distance", "4", "Distance points a survivor can get", FCVAR_PLUGIN);
+    cvar_deathwishDistance = CreateConVar("l4d_deathwish_distance", "10", "Distance points a survivor can get", FCVAR_PLUGIN);
     HookConVarChange(cvar_deathwishDistance, DeathwishDistanceChange);
 
+    cvar_survivalBonus = FindConVar("vs_survival_bonus");
+    
     PluginEnable();
     
-    //RegConsoleCmd("saferoom", TeleportToSaferoom, "Teleports a player to the saferoom");
-    //RegConsoleCmd("myflow", PrintFlowToClient, "Prints a player's flow to them");
+    RegConsoleCmd("saferoom", TeleportToSaferoom, "Teleports a player to the saferoom");
+    RegConsoleCmd("myflow", PrintFlowToClient, "Prints a player's flow to them");
     
     iScoreTeams[L4D2Team_Survivor] = L4D2_TeamA;
     iScoreTeams[L4D2Team_Infected] = L4D2_TeamB;    
+}
+
+public OnPluginEnd() {
+    PluginDisable();
 }
 
 public OnMapStart() {
@@ -87,9 +101,23 @@ public OnMapStart() {
         iScores[1] = 0;
         iLastScores[0] = 0;
         iLastScores[1] = 0;
+        iMaxDistance   = 5;
+        iSurvivalBonuses[3] = 5;
+        iSurvivalBonuses[2] = 4;
+        iSurvivalBonuses[1] = 3;
+        iSurvivalBonuses[0] = 2;
+    }
+    else {
+        iMaxDistance = 10;
+        iSurvivalBonuses[3] = 10;
+        iSurvivalBonuses[2] = 8;
+        iSurvivalBonuses[1] = 5;
+        iSurvivalBonuses[0] = 4;
     }
     
-    flMaxFlow           = LGO_GetMapValueFloat("max_flow")*0.95;
+    iTankFlow           = 0;
+    flMaxFlow           = LGO_GetMapValueFloat("max_flow")*0.97;
+    iMaxDistance        = LGO_GetMapValueInt("max_distance",iMaxDistance);
     iDefaultMapDistance = L4D_GetVersusMaxCompletionScore();
     bSecondRound        = false;
     bRoundStarted       = false;
@@ -126,6 +154,9 @@ PluginEnable() {
     HookEvent("round_end", DeathwishRoundEnd);
     HookEvent("door_close", DeathwishDoorClose);
     HookEvent("player_left_start_area", DeathwishPlayerLeftStartArea);
+    HookEvent("tank_spawn", DeathwishTankSpawn);
+    HookEvent("player_death", DeathwishTankKilled);
+    HookEvent("player_use", DeathwishSaferoomDoor);
     
     timer_setScores = CreateTimer(3.0, DeathwishSetScores, _, TIMER_REPEAT);
     LogMessage("[Deathwish] Plugin enabled");
@@ -137,6 +168,9 @@ PluginDisable() {
     UnhookEvent("round_end", DeathwishRoundEnd);
     UnhookEvent("door_close", DeathwishDoorClose);
     UnhookEvent("player_left_start_area", DeathwishPlayerLeftStartArea);
+    UnhookEvent("tank_spawn", DeathwishTankSpawn);
+    UnhookEvent("player_death", DeathwishTankKilled);
+    UnhookEvent("player_use", DeathwishSaferoomDoor);
     
     L4D_SetVersusMaxCompletionScore(iDefaultMapDistance);
     
@@ -189,7 +223,7 @@ static Float:L4D2_GetPlayerFlowDistance( client ) {
     return SDKCall(fPlayerGetFlowDistance, client, 0);
 }
 
-GetSurvivorPoints(client) {
+GetSurvivorDistance(client) {
     new Float:flow      = L4D2_GetPlayerFlowDistance(client);
     new Float:fDistance = (flow/flMaxFlow) * (iMaxDistance);
     new iDistance       = RoundToFloor(fDistance);
@@ -199,21 +233,37 @@ GetSurvivorPoints(client) {
     return iDistance > iMaxDistance ? iMaxDistance : iDistance;
 }
 
+UpdateSurvivorScore(client) {
+    new index = GetEntProp(client, Prop_Send, "m_survivorCharacter");
+    new currentDistance = GetSurvivorDistance(client);
+    new diff = currentDistance - iSurvivorLastDistance[index];
+    if ( diff > 0 ) {
+        new incaps = GetEntProp(client, Prop_Send, "m_currentReviveCount");
+        new points = 2;
+        
+        if ( incaps ) {
+            points--;
+        }
+        
+        iSurvivorLastDistance[index] = currentDistance;
+        iSurvivorScores[index] += diff * points;
+        
+        PrintToChat(client, "[Deathwish] You have received %d points for reaching %d%% with %d incaps.",
+            diff*points, currentDistance*(100/iMaxDistance), incaps);
+    }
+}
+
 CalculateScores() {
     for ( new i = 1; i <= MaxClients; i++ ) {
         if ( IsClientInGame(i)
         && GetClientTeam(i) == L4D2Team_Survivor
         && IsPlayerAlive(i) ) {
-            new index = GetEntProp(i, Prop_Send, "m_survivorCharacter");
-            new currentPoints = GetSurvivorPoints(i);
-            if ( currentPoints > iSurvivorScores[index] ) {
-                iSurvivorScores[index] = currentPoints;
-                PrintToChat(i, "[Deathwish] You have received a distance point for reaching %d%%.", currentPoints*25); 
-            }
+            UpdateSurvivorScore(i);
         }
     }
     
-    iScores[iScoreTeams[L4D2Team_Survivor]] = iLastScores[iScoreTeams[L4D2Team_Survivor]]
+    new surv = iScoreTeams[L4D2Team_Survivor];
+    iScores[surv] = iLastScores[surv]
         + iSurvivorScores[0] + iSurvivorScores[1] + iSurvivorScores[2]
         + iSurvivorScores[3] + iBonusPoints;
 }
@@ -226,10 +276,8 @@ PrintFlows() {
             decl String:name[128];
             GetClientName(i, name, sizeof(name));
             
-            new points = GetSurvivorPoints(i);
             new Float:flow = L4D2_GetPlayerFlowDistance(i);
-            
-            LogMessage("[Deathwish] %s's flow is %f (%d)", name, flow, points);
+            LogMessage("[Deathwish] %s's flow is %f", name, flow);
         }
     }
 }
@@ -269,12 +317,7 @@ public Action:DeathwishPlayerDeath( Handle:event, const String:name[], bool:dont
     LogMessage("[Deathwish] %s died at %f flow", clientName, L4D2_GetPlayerFlowDistance(client));
     
     // Set a players max flow
-    new index = GetEntProp(client, Prop_Send, "m_survivorCharacter");
-    new currentPoints = GetSurvivorPoints(client);
-    if ( currentPoints > iSurvivorScores[index] ) {
-        iSurvivorScores[index] = currentPoints;
-    }
-    
+    UpdateSurvivorScore(client);
     PrintFlows();
 }
 
@@ -282,11 +325,19 @@ public Action:DeathwishRoundStart( Handle:event, const String:name[], bool:dontB
     L4D_SetVersusMaxCompletionScore(0);
     
     bRoundEnded         = false;
+    bTankAlive          = false;
     iBonusPoints        = 0;
     iSurvivorScores[0]  = 0;
     iSurvivorScores[1]  = 0;
     iSurvivorScores[2]  = 0;
     iSurvivorScores[3]  = 0;
+    iSurvivorLastDistance[0] = 0;
+    iSurvivorLastDistance[1] = 0;
+    iSurvivorLastDistance[2] = 0;
+    iSurvivorLastDistance[3] = 0;
+    
+    iSaferoomDoor = -1;
+    CloseSaferoomDoor();
     
     if ( bSecondRound ) {
         SwitchScoreTeams();
@@ -295,6 +346,14 @@ public Action:DeathwishRoundStart( Handle:event, const String:name[], bool:dontB
 
 public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], bool:dontBroadcast ) {
     bRoundStarted = true;
+
+    if ( !bSecondRound ) {    
+        decl Float:tankFlows[2];
+        
+        // XXX: minus by 5% as tank spawns at this position when survivors are a bit earlier
+        L4D2_GetVersusTankFlowPercent(tankFlows);
+        iTankFlow = RoundToNearest((tankFlows[iScoreTeams[L4D2Team_Survivor]] * 100.0) - 5.0);
+    }
 }
 
 public Action:DeathwishRoundEnd( Handle:event, const String:name[], bool:dontBroadcast ) {
@@ -314,21 +373,98 @@ public Action:DeathwishRoundEnd( Handle:event, const String:name[], bool:dontBro
 public Action:DeathwishDoorClose( Handle:event, const String:name[], bool:dontBroadcast ) {
     if ( GetEventBool(event, "checkpoint") ) {
         TriggerTimer(timer_setScores);
+        SetSurvivalBonus();
         PrintFlows();
     }
 }
 
-public Action:DeathwishSetScores( Handle:timer ) {
-    if ( bRoundStarted && !bRoundEnded ) {
-        CalculateScores();
-        L4D2_SetVersusCampaignScores(iScores);
-        RedrawHUD();
+public Action:DeathwishTankSpawn( Handle:event, const String:name[], bool:dontBroadcast ) {
+    if ( !bTankAlive ) {
+        TriggerTimer(timer_setScores);
+    }
+    bTankAlive = true;
+}
+
+public Action:DeathwishTankKilled( Handle:event, const String:name[], bool:dontBroadcast ) {
+    new client = GetClientOfUserId(GetEventInt(event, "userid"));
+    
+    if ( bTankAlive && client
+    && GetClientTeam(client) == L4D2Team_Infected
+    && GetEntProp(client, Prop_Send, "m_zombieClass") == TANK_ZOMBIE_CLASS ) {
+        bTankAlive = false;
+    }
+}
+
+public Action:DeathwishSaferoomDoor( Handle:event, const String:name[], bool:dontBroadcast ) {
+    new client = GetClientOfUserId(GetEventInt(event, "userid"));
+    new iEntity = GetEventInt(event, "targetid");
+    decl String:className[128];
+    
+    if ( IsValidEntity(iEntity) && iEntity == iSaferoomDoor ) {
+        if ( bTankAlive ) {
+            LockSaferoomDoor();
+            PrintToChat(client, "[Deathwish] The tank must be killed before entering the saferoom.");
+        }
+        else {
+            UnlockSaferoomDoor();
+        }
     }
     
     return Plugin_Continue;
 }
+    
+public Action:DeathwishSetScores( Handle:timer ) {
+    if ( bRoundStarted && !bRoundEnded && !bTankAlive ) {
+        CalculateScores();
+        L4D2_SetVersusCampaignScores(iScores);
+        RedrawHUD(0);
+    }
+    else if ( bRoundStarted && bTankAlive ) {
+        RedrawHUD(L4D2Team_Survivor);
+    }
+    
+    
+    return Plugin_Continue;
+}
 
-RedrawHUD() {
+SetSurvivalBonus() {
+    new count = 0;
+    
+    for ( new i = 1; i <= MaxClients; i++ ) {
+        if ( IsClientInGame(i) && GetClientTeam(i) == L4D2Team_Survivor && IsPlayerAlive(i) ) {
+            count++;
+        }
+    }
+    
+    SetConVarInt(cvar_survivalBonus, iSurvivalBonuses[(count-1)%3]);
+}
+
+CloseSaferoomDoor() {
+    new iEntity = -1;
+    
+    while ( (iEntity = FindEntityByClassname(iEntity, "prop_door_rotating_checkpoint")) != -1 ) {
+        if ( GetEntProp(iEntity, Prop_Data, "m_hasUnlockSequence") == 0 ) {
+            iSaferoomDoor = iEntity;
+            LockSaferoomDoor();
+        }
+    }
+}
+
+LockSaferoomDoor() {
+    AcceptEntityInput(iSaferoomDoor, "Close");
+    AcceptEntityInput(iSaferoomDoor, "Lock");
+    AcceptEntityInput(iSaferoomDoor, "ForceClosed");
+    SetEntProp(iSaferoomDoor, Prop_Data, "m_hasUnlockSequence", 1);
+}
+
+UnlockSaferoomDoor() {
+    SetEntProp(iSaferoomDoor, Prop_Data, "m_hasUnlockSequence", 0);
+    AcceptEntityInput(iSaferoomDoor, "Unlock");
+    AcceptEntityInput(iSaferoomDoor, "ForceClosed");
+    AcceptEntityInput(iSaferoomDoor, "Open");
+}
+
+RedrawHUD(team) {
     if ( scoresHUD != INVALID_HANDLE ) {
         CloseHandle(scoresHUD);
     }
@@ -336,12 +472,14 @@ RedrawHUD() {
     scoresHUD = CreatePanel();
     
     decl String:scoresString[64];
-    Format(scoresString, sizeof(scoresString), "%d - %d", iScores[0], iScores[1]);
+    Format(scoresString, sizeof(scoresString), "%d - %d (%d%%)", iScores[0], iScores[1], iTankFlow);
     DrawPanelText(scoresHUD, scoresString);
     
     for ( new client = 1; client <= MaxClients; client++ ) {
         if ( IsClientInGame(client) && !IsFakeClient(client) ) {
-            SendPanelToClient(scoresHUD, client, MenuHandlerHUD, 3);
+            if ( !team || GetClientTeam(client) == team ) {
+                SendPanelToClient(scoresHUD, client, MenuHandlerHUD, 3);
+            }
         }
     }
 }
@@ -361,4 +499,10 @@ public Action:PrintFlowToClient(client, args) {
     
     Format(flow, sizeof(flow), "[Deathwish] Your flow is %f.", L4D2_GetPlayerFlowDistance(client));
     ReplyToCommand(client, flow);
+    
+    new Handle:file = OpenFile("flows.txt", "a");
+    decl String:mapName[128];
+    GetCurrentMap(mapName, sizeof(mapName));
+    WriteFileLine(file, "%s flow: %f", mapName, L4D2_GetPlayerFlowDistance(client));
+    CloseHandle(file);
 }
