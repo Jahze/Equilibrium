@@ -22,6 +22,8 @@ new iTankFlow;
 
 new Handle:cvar_deathwishScoring;
 
+new String:sTankFlowMsg[128];
+
 public Plugin:myinfo = {
     name        = "L4D2 Deathwish Scoring",
     author      = "Jahze",
@@ -32,6 +34,8 @@ public Plugin:myinfo = {
 public OnPluginStart() {
     cvar_deathwishScoring = CreateConVar("l4d_deathwish_scoring", "1", "Changes default L4D2 scoring to deathwish style", FCVAR_PLUGIN);
     HookConVarChange(cvar_deathwishScoring, DeathwishScoringChange);
+    
+    RegConsoleCmd("sm_tank", TankCmd);
     
     PluginEnable();
 }
@@ -44,6 +48,7 @@ public OnMapStart() {
     iTankFlow       = 0;
     bSecondRound    = false;
     iDistance       = L4D_GetVersusMaxCompletionScore();
+    sTankFlowMsg[0] = 0;
 }
 
 public OnMapEnd() {
@@ -82,12 +87,14 @@ public DeathwishScoringChange( Handle:cvar, const String:oldValue[], const Strin
 }
 
 public Action:DeathwishRoundStart( Handle:event, const String:name[], bool:dontBroadcast ) {
-    bTankAlive          = false;
+    bTankAlive = false;
     
     iSaferoomDoor = -1;
     CloseSaferoomDoor();
     
-    L4D_SetVersusMaxCompletionScore(iDistance);
+    if ( bSecondRound ) {
+        L4D_SetVersusMaxCompletionScore(iDistance);
+    }
 }
 
 public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], bool:dontBroadcast ) {
@@ -98,7 +105,8 @@ public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], b
         L4D2_GetVersusTankFlowPercent(tankFlows);
         iTankFlow = RoundToNearest((tankFlows[0] * 100.0) - 5.0);
         
-        PrintHintTextToAll("[Deathwish] The tank will spawn at %d%s through the map.", iTankFlow, "%%");
+        Format(sTankFlowMsg, sizeof(sTankFlowMsg), "[Deathwish] The tank will spawn at %d%s through the map.", iTankFlow, "%%");
+        PrintHintTextToAll(sTankFlowMsg);
     }
 }
 
@@ -166,3 +174,10 @@ UnlockSaferoomDoor() {
     AcceptEntityInput(iSaferoomDoor, "ForceClosed");
     AcceptEntityInput(iSaferoomDoor, "Open");
 }
+
+public Action:TankCmd(client, args) {
+    if ( strlen(sTankFlowMsg) ) {
+        ReplyToCommand(client, sTankFlowMsg);
+    }
+}
+
