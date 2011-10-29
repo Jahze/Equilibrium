@@ -2,7 +2,6 @@
 
 #include <sourcemod>
 #include <sdktools>
-#include <mapinfo>
 
 #define MAX_CAN_NAMES       3
 
