@@ -10,6 +10,9 @@
 const WEAPON_HUNTING_RIFLE_ID   = 6;
 const WEAPON_SNIPER_SCOUT_ID    = 36;
 
+new SCOUT_CLIP_SIZE = 8;
+new SCOUT_DAMAGE    = 115;
+
 new bool:bScoutEnabled;
 new bool:bHooked;
 
@@ -17,16 +20,19 @@ new iScoutLimit         = 1;
 new iScoutLastWeapon    = -1;
 new iScoutLastClient    = -1;
 new iDefaultClipSize    = 15;
+new iDefaultDamage      = 90;
 new String:sScoutLastWeapon[64];
 
 new Handle:cvar_scoutEnabled;
 new Handle:cvar_scoutLimit;
+new Handle:cvar_scoutClipSize;
+new Handle:cvar_scoutDamage;
 
 public Plugin:myinfo =
 {
     name        = "L4D2 Scout Sniper",
     author      = "Jahze",
-    version     = "0.1",
+    version     = "1.0",
     description = "Replace hunting rifle with the scout"
 }
 
@@ -36,6 +42,12 @@ public OnPluginStart() {
     
     cvar_scoutLimit = CreateConVar("l4d_scout_limit", "1", "Limits the maximum number of scouts per team", FCVAR_PLUGIN);
     HookConVarChange(cvar_scoutLimit, ScoutLimitChange);
+    
+    cvar_scoutClipSize = CreateConVar("l4d_scout_clip", "8", "Bullets in a scout clip", FCVAR_PLUGIN);
+    HookConVarChange(cvar_scoutClipSize, ScoutClipSizeChange);
+    
+    cvar_scoutDamage = CreateConVar("l4d_scout_damage", "115", "Damage per scout bullet", FCVAR_PLUGIN);
+    HookConVarChange(cvar_scoutDamage, ScoutDamageChange);
     
     bScoutEnabled = GetConVarBool(cvar_scoutEnabled);
     iScoutLimit = GetConVarInt(cvar_scoutLimit);
@@ -59,9 +71,11 @@ PluginDisable() {
         UnhookEvent("spawner_give_item", SpawnerGiveItemHook);
         UnhookEvent("player_use", ScoutPlayerUse);
         UnhookEvent("weapon_drop", ScoutWeaponDrop);
-        bHooked = false;
         
         L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, iDefaultClipSize);
+        L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage, iDefaultDamage);
+        
+        bHooked = false;
     }
 }
 
@@ -71,19 +85,23 @@ PluginEnable() {
         HookEvent("spawner_give_item", SpawnerGiveItemHook);
         HookEvent("player_use", ScoutPlayerUse);
         HookEvent("weapon_drop", ScoutWeaponDrop);
+        
+        iDefaultClipSize = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize);
+        iDefaultDamage   = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage);
+        L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, SCOUT_CLIP_SIZE);
+        L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage, SCOUT_DAMAGE);
+        
         bHooked = true;
     }
 }
 
 PreloadWeapons() {
+    if (IsModelPrecached(SCOUT_MDL)) PrecacheModel(SCOUT_MDL);
     if (!IsModelPrecached("models/v_models/v_snip_scout.mdl")) PrecacheModel("models/v_models/v_snip_scout.mdl");
     
     new index = CreateEntityByName("weapon_sniper_scout");
     DispatchSpawn(index);
     RemoveEdict(index);
-    
-    iDefaultClipSize = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize);
-    L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, 10);
 }
 
 public ScoutEnabled( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
@@ -95,6 +113,16 @@ public ScoutEnabled( Handle:cvar, const String:oldValue[], const String:newValue
         PluginEnable();
         bScoutEnabled = true;
     }
+}
+
+public ScoutClipSizeChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
+    SCOUT_CLIP_SIZE = StringToInt(newValue);
+    L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, SCOUT_CLIP_SIZE);
+}
+
+public ScoutDamageChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
+    SCOUT_DAMAGE = StringToInt(newValue);
+    L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage, SCOUT_DAMAGE);
 }
 
 public ScoutLimitChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
@@ -176,6 +204,25 @@ DetectAndReplaceHR( iEntity, bool:bSpawnerEvent = false ) {
     
     if ( IsHuntingRifle(iEntity, sEntityClassName) ) {
         ReplaceHuntingRifle(iEntity, sEntityClassName, bSpawnerEvent);
+    }
+}
+
+public Action:ScoutUsed( Handle:timer ) {
+    for ( new client = 0; client <= MaxClients; client++ ) {
+        new weapon = GetPlayerWeaponSlot(client, 0);
+        
+        if ( !IsValidEdict(weapon) ) {
+            return;
+        }
+        
+        decl String:weaponName[64];
+        GetEdictClassname(weapon, weaponName, sizeof(weaponName));
+        
+        // Adjust scout ammo
+        if ( StrEqual(weaponName, SCOUT_WEAPON_NAME) ) {
+            SetEntProp(weapon, Prop_Send, "m_iClip1", SCOUT_CLIP_SIZE);
+            break;
+        }
     }
 }
 
