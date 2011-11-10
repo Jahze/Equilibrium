@@ -10,8 +10,8 @@
 const WEAPON_HUNTING_RIFLE_ID   = 6;
 const WEAPON_SNIPER_SCOUT_ID    = 36;
 
-new SCOUT_CLIP_SIZE = 8;
-new SCOUT_DAMAGE    = 115;
+new SCOUT_CLIP_SIZE = 10;
+new SCOUT_DAMAGE    = 135;
 
 new bool:bScoutEnabled;
 new bool:bHooked;
