@@ -68,8 +68,9 @@ public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], b
         iTankFlow = RoundToNearest((tankFlows[0] * 100.0) - 5.0);
         
         Format(sTankFlowMsg, sizeof(sTankFlowMsg), "[Deathwish] The tank will spawn at %d%s through the map.", iTankFlow, "%%");
-        PrintToChatAll(sTankFlowMsg);
     }
+    
+    PrintToChatAll(sTankFlowMsg);
 }
 
 public Action:DeathwishRoundEnd( Handle:event, const String:name[], bool:dontBroadcast ) {
