@@ -90,13 +90,11 @@ public Action:TankPropTankKilled( Handle:event, const String:name[], bool:dontBr
         return;
     }
     
-    LogMessage("[Deathwish] Tank may have died");
     CreateTimer(0.1, TankDeadCheck);
 }
 
 public Action:TankDeadCheck( Handle:timer ) {
     if ( GetTankClient() == -1 ) {
-        LogMessage("[Deathwish] Tank dead");
         UnhookTankProps();
         CreateTimer(5.0, FadeTankProps);
         tankSpawned = false;
@@ -104,11 +102,8 @@ public Action:TankDeadCheck( Handle:timer ) {
 }
 
 public PropDamaged(victim, attacker, inflictor, Float:damage, damageType) {
-    LogMessage("[Deathwish] tank prop took damage: %d %d %d %d", attacker, GetTankClient(),
-        FindValueInArray(hTankPropsHit, inflictor), FindValueInArray(hTankPropsHit, victim));
     if ( attacker == GetTankClient() || FindValueInArray(hTankPropsHit, inflictor) != -1 ) {
         if ( FindValueInArray(hTankPropsHit, victim) == -1 ) {
-            LogMessage("[Deathwish] Tank hit a prop");
             PushArrayCell(hTankPropsHit, victim);
         }
     }
@@ -149,7 +144,6 @@ HookTankProps() {
     
     for ( new i = 1; i <= iEntCount; i++ ) {
         if ( IsTankProp(i) ) {
-            LogMessage("[Deathwish] Hooked a tank prop");
             SDKHook(i, SDKHook_OnTakeDamagePost, PropDamaged);
             PushArrayCell(hTankProps, i);
         }
