@@ -15,6 +15,7 @@ new SCOUT_DAMAGE    = 135;
 
 new bool:bScoutEnabled;
 new bool:bHooked;
+new bool:bTweaked;
 
 new iScoutLimit         = 1;
 new iScoutLastWeapon    = -1;
@@ -53,6 +54,7 @@ public OnPluginStart() {
     iScoutLimit = GetConVarInt(cvar_scoutLimit);
     
     bHooked = false;
+    bTweaked = false;
 }
 
 public OnPluginEnd() {
@@ -76,6 +78,7 @@ PluginDisable() {
         L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage, iDefaultDamage);
         
         bHooked = false;
+        bTweaked = false;
     }
 }
 
@@ -85,11 +88,6 @@ PluginEnable() {
         HookEvent("spawner_give_item", SpawnerGiveItemHook);
         HookEvent("player_use", ScoutPlayerUse);
         HookEvent("weapon_drop", ScoutWeaponDrop);
-        
-        iDefaultClipSize = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize);
-        iDefaultDamage   = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage);
-        L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, SCOUT_CLIP_SIZE);
-        L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage, SCOUT_DAMAGE);
         
         bHooked = true;
     }
@@ -102,6 +100,14 @@ PreloadWeapons() {
     new index = CreateEntityByName("weapon_sniper_scout");
     DispatchSpawn(index);
     RemoveEdict(index);
+    
+    if ( !bTweaked ) {
+        iDefaultClipSize = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize);
+        iDefaultDamage   = L4D2_GetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage);
+        L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_ClipSize, SCOUT_CLIP_SIZE);
+        L4D2_SetIntWeaponAttribute(SCOUT_WEAPON_NAME, L4D2IWA_Damage, SCOUT_DAMAGE);
+        bTweaked = true;
+    }
 }
 
 public ScoutEnabled( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
