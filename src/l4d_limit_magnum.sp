@@ -80,7 +80,6 @@ LimitMagnum( iEntity, const String:count[] ) {
             
     new iFlags = GetEntityFlags(iEntity);
     
-    LogMessage("[Deathwish] Found a magnum spawn with flags %d", iFlags);
     if ( iFlags & FLAG_COUNT ) {
         SetEntityFlags(iEntity, iFlags ^ FLAG_COUNT);
     }
