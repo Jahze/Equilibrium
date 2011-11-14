@@ -6,7 +6,9 @@
 #include <mapinfo>
 
 new bool:distanceEnabled = false;
+
 new Handle:cvar_customMapDistance;
+new Handle:cvar_hbRatio;
 
 public Plugin:myinfo = {
     name        = "L4D2 Custom Map Distance",
@@ -48,8 +50,18 @@ PluginDisable() {
 
 public Action:SetMapDistance( Handle:timer ) {
     if ( distanceEnabled ) {
-        new iDistance = LGO_GetMapValueInt("max_distance", L4D_GetVersusMaxCompletionScore());
+        new iDefaultDistance = L4D_GetVersusMaxCompletionScore();
+        
+        if ( cvar_hbRatio == INVALID_HANDLE ) {
+            cvar_hbRatio = FindConVar("SM_healthbonusratio");
+        }
+        
+        new iDistance = LGO_GetMapValueInt("max_distance", iDefaultDistance);
         L4D_SetVersusMaxCompletionScore(iDistance);
+        
+        if ( cvar_hbRatio != INVALID_HANDLE ) {
+            SetConVarFloat(cvar_hbRatio, Float:iDistance/Float:iDefaultDistance);
+        }
     }
 }
 
