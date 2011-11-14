@@ -113,7 +113,7 @@ public Action:RoundStartLimitMelee( Handle:timer ) {
             }
             
             // If we have stored melees then remove all but these
-            if ( hStoredMelees ) {
+            if ( bStoredMelees ) {
                 if ( !IsStoredMelee(iEntity) ) {
                     RemoveMelee(iEntity);
                 }
