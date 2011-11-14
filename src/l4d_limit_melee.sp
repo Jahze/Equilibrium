@@ -162,7 +162,6 @@ public Action:RoundStartLimitMelee( Handle:timer ) {
         decl Float:fPos[3];
         GetEntPropVector(GetArrayCell(hKeepMelees, i), Prop_Send, "m_vecOrigin", fPos);
         PushArrayArray(hStoredMelees, fPos);
-        LogMessage("[Deathwish] Melee at %f %f %f", fPos[0], fPos[1], fPos[2]);
     }
     
     ClearArray(hKeepMelees);
@@ -175,11 +174,8 @@ bool:IsStoredMelee( iEntity ) {
     decl Float:fPos1[3], fPos2[3];
     GetEntPropVector(iEntity, Prop_Send, "m_vecOrigin", fPos1);
     
-    LogMessage("[Deathwish] Comparing melee at %f %f %f", fPos1[0], fPos1[1], fPos1[2]);
-    
     for ( new i = 0; i < GetArraySize(hStoredMelees); i++ ) {
         GetArrayArray(hStoredMelees, i, fPos2);
-        LogMessage("    [Deathwish] with melee at %f %f %f (%f)", fPos2[0], fPos2[1], fPos2[2], GetVectorDistance(fPos1, fPos2));
         if ( GetVectorDistance(fPos1, fPos2) < 1.0 ) {
             return true;
         }
