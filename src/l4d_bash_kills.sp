@@ -59,8 +59,9 @@ bool:IsSI( client ) {
     new playerClass = GetEntProp(client, Prop_Send, "m_zombieClass");
     
     if ( playerClass == BOOMER_ZOMBIE_CLASS ) {
-        return true;
+        return false;
     }
+    
     return true;
 }
 
