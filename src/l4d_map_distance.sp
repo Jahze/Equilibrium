@@ -7,8 +7,11 @@
 
 new bool:distanceEnabled = false;
 
+new Float:fDesiredHb = 1.0;
+
 new Handle:cvar_customMapDistance;
 new Handle:cvar_hbRatio;
+new Handle:cvar_desiredHb;
 
 public Plugin:myinfo = {
     name        = "L4D2 Custom Map Distance",
@@ -20,6 +23,12 @@ public Plugin:myinfo = {
 public OnPluginStart() {
     cvar_customMapDistance = CreateConVar("l4d_map_distance", "1", "Sets a custom distance if defined in mapinfo.txt", FCVAR_PLUGIN);
     HookConVarChange(cvar_customMapDistance, CustomDistanceChange);
+    
+    // XXX: The desired health bonus ratio. Set this to what you would set SM_healthbonusratio to.
+    // l4d2_scoremod.sp doesn't work with l4d2lib as the call to get max_distance uses a literal default
+    // value or something ("Invalid address value")
+    cvar_desiredHb = CreateConVar("l4d_desired_hb", "1", "The desired health bonus ratio (this is a hack)", FCVAR_PLUGIN);
+    HookConVarChange(cvar_desiredHb, DesiredHbChange);
     
     PluginEnable();
 }
@@ -60,7 +69,7 @@ public Action:SetMapDistance( Handle:timer ) {
         L4D_SetVersusMaxCompletionScore(iDistance);
         
         if ( cvar_hbRatio != INVALID_HANDLE ) {
-            SetConVarFloat(cvar_hbRatio, Float:iDistance/Float:iDefaultDistance);
+            SetConVarFloat(cvar_hbRatio, (Float:iDistance/Float:iDefaultDistance) * fDesiredHb);
         }
     }
 }
@@ -72,6 +81,10 @@ public CustomDistanceChange( Handle:cvar, const String:oldValue[], const String:
     else {
         PluginEnable();
     }
+}
+
+public DesiredHbChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
+    fDesiredHb = StringToFloat(newValue);
 }
 
 public Action:AnnounceMapDistance( Handle:event, const String:name[], bool:dontBroadcast ) {
