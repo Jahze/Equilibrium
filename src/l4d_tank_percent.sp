@@ -3,6 +3,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <left4downtown>
+#include <mapinfo>
 
 new bool:bSecondRound;
 new iTankFlow;
@@ -63,10 +64,14 @@ public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], b
     if ( !bSecondRound ) {    
         decl Float:tankFlows[2];
         
-        // XXX: minus by 5% as tank spawns at this position when survivors are a bit earlier
         L4D2_GetVersusTankFlowPercent(tankFlows);
-        iTankFlow = RoundToNearest((tankFlows[0] * 100.0) - 5.0);
+        iTankFlow = RoundToNearest(tankFlows[0] * 100.0);
         
+        // Block certain tank spawns based on map info
+        AdjustTankFlow();
+        
+        // XXX: minus by 5% as tank spawns at this position when survivors are a bit earlier
+        iTankFlow -= 5;
         Format(sTankFlowMsg, sizeof(sTankFlowMsg), "[Deathwish] The tank will spawn at %d%s through the map.", iTankFlow, "%%");
     }
     
@@ -84,3 +89,37 @@ public Action:TankCmd(client, args) {
     }
 }
 
+AdjustTankFlow() {
+    new minFlow = LGO_GetMapValueInt("tank_ban_flow_min");
+    new maxFlow = LGO_GetMapValueInt("tank_ban_flow_max");
+    
+    // Check inputs exist and are sensible
+    if ( minFlow == 0 || maxFlow == 0 || maxFlow < minFlow ) {
+        return;
+    }
+
+    // Is the tank in the allowed spawn range?    
+    if ( iTankFlow < minFlow || iTankFlow > maxFlow ) {
+        return;
+    }
+    
+    LogMessage("[Deathwish] Found a banned tank spawn at %d (banned area: %d to %d)",
+        iTankFlow, minFlow, maxFlow);
+    
+    minFlow = minFlow < 15 ? 15 : minFlow;
+    maxFlow = maxFlow > 85 ? 85 : maxFlow;
+    
+    // XXX: Spawn the tank between 15% and 85% cutting out the banned area
+    new range = maxFlow - minFlow;
+    new r     = 15 + GetRandomInt(0, 70-range);
+    iTankFlow = r >= minFlow ? r + range : r;
+    
+    new Float:flows[2];
+    
+    flows[0] = float(iTankFlow)/100.0;
+    flows[1] = flows[0];
+    
+    LogMessage("[Deathwish] Adjusted tank spawn to %d (%f)", iTankFlow, flows[0]);
+    
+    L4D2_SetVersusTankFlowPercent(flows);
+}
