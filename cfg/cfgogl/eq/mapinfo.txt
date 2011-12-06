@@ -10,7 +10,7 @@
         "tank_z_fix"        "1"
         "max_tank_z"        "1200.000000"
         "tamk_warpto"       "2168.357666 5803.427734 2464.031250"
-        "max_distance"      "500"
+        "max_distance"      "300"
         "ItemLimits"
         {
             "molotov"       "0"
