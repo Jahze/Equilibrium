@@ -4,7 +4,8 @@
 #include <sdktools>
 #include <left4downtown>
 
-#define SCOUT_MDL           "models/w_models/weapons/w_sniper_scout.mdl"
+#define SCOUT_W_MDL         "models/w_models/weapons/w_sniper_scout.mdl"
+#define SCOUT_V_MDL         "models/v_models/v_snip_scout.mdl"
 #define SCOUT_WEAPON_NAME   "weapon_sniper_scout"
 
 const WEAPON_HUNTING_RIFLE_ID   = 6;
@@ -94,8 +95,8 @@ PluginEnable() {
 }
 
 PreloadWeapons() {
-    if (IsModelPrecached(SCOUT_MDL)) PrecacheModel(SCOUT_MDL);
-    if (!IsModelPrecached("models/v_models/v_snip_scout.mdl")) PrecacheModel("models/v_models/v_snip_scout.mdl");
+    if (!IsModelPrecached(SCOUT_W_MDL)) PrecacheModel(SCOUT_W_MDL);
+    if (!IsModelPrecached(SCOUT_V_MDL)) PrecacheModel(SCOUT_V_MDL);
     
     new index = CreateEntityByName("weapon_sniper_scout");
     DispatchSpawn(index);
@@ -190,7 +191,7 @@ ReplaceHuntingRifle( iEntity, const String:sEntityClassName[128], bool:bSpawnerE
         // Replace with a weapon_spawn
         iEntity = CreateEntityByName("weapon_spawn");
         SetEntProp(iEntity, Prop_Send, "m_weaponID", WEAPON_SNIPER_SCOUT_ID);
-        SetEntityModel(iEntity, SCOUT_MDL);
+        SetEntityModel(iEntity, SCOUT_W_MDL);
         
         TeleportEntity(iEntity, fOrigin, fRotation, NULL_VECTOR);
         DispatchKeyValue(iEntity, "count", "5");
@@ -201,7 +202,7 @@ ReplaceHuntingRifle( iEntity, const String:sEntityClassName[128], bool:bSpawnerE
     }
     
     SetEntProp(iEntity, Prop_Send, "m_weaponID", WEAPON_SNIPER_SCOUT_ID);
-    SetEntityModel(iEntity, SCOUT_MDL);
+    SetEntityModel(iEntity, SCOUT_W_MDL);
 }
 
 DetectAndReplaceHR( iEntity, bool:bSpawnerEvent = false ) {
@@ -253,7 +254,7 @@ public Action:ScoutPlayerUse( Handle:event, const String:name[], bool:dontBroadc
     if ( StrEqual(weaponName, SCOUT_WEAPON_NAME) ) {
         if ( ScoutCount(client) >= iScoutLimit ) {
             RemovePlayerItem(client, weapon);
-            PrintToChat(client, "[Deathwish] Maximum of %d scout(s) per team.", iScoutLimit);
+            PrintToChat(client, "[Scout] Maximum of %d scout(s) per team.", iScoutLimit);
             
             if ( client == iScoutLastClient ) {
                 if ( IsValidEdict(iScoutLastWeapon) ) {
