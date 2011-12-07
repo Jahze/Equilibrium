@@ -43,7 +43,6 @@ public Action:Hurt( victim, &attacker, &inflictor, &Float:damage, &damageType, &
     }
     
     if ( damage == 250.0 && damageType == 128 && weapon == -1 && IsSurvivor(attacker) ) {
-        PrintToChatAll("[Deathwish] m2 damage blocked?");
         return Plugin_Handled;
     }
     
