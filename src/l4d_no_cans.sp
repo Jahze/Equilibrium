@@ -1,6 +1,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <sdkhooks>
 #include <sdktools>
 
 #define MAX_CAN_NAMES       3
@@ -42,6 +43,18 @@ PluginEnable() {
     HookEvent("round_start", RoundStartHook);
 }
 
+public OnEntityCreated( entity, const String:classname[] ) {
+    if ( IsValidEntity(entity) && IsValidEdict(entity) && StrEqual(classname, "prop_physics") ) {
+        SDKHook(entity, SDKHook_Spawn, OnEntitySpawned);
+    }
+}
+
+public OnEntitySpawned( entity ) {
+    if ( IsCan(entity) ) {
+        AcceptEntityInput(entity, "Kill");
+    }
+}
+
 public NoCansChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
     if ( StringToInt(newValue) == 0 ) {
         bNoCans = false;
@@ -60,9 +73,7 @@ IsCan( iEntity ) {
     
     for ( new i = 0; i < MAX_CAN_NAMES; i++ ) {
         if ( StrEqual(sModelName, CAN_MODEL_NAMES[i], false) ) {
-            if ( bool:GetEntProp(iEntity, Prop_Send, "m_isCarryable", 1) ) {
-                return true;
-            }
+            return true;
         }
     }
     
