@@ -5,6 +5,8 @@
 #include <left4downtown>
 #include <mapinfo>
 
+#include "cfgname.sp"
+
 new bool:bSecondRound;
 new iTankFlow;
 
@@ -15,7 +17,7 @@ new String:sTankFlowMsg[128];
 public Plugin:myinfo = {
     name        = "L4D2 Tank Percent",
     author      = "Jahze",
-    version     = "1.0",
+    version     = "1.1",
     description = "Tell players when the tank will spawn"
 };
 
@@ -63,6 +65,7 @@ public TankPercentChange( Handle:cvar, const String:oldValue[], const String:new
 public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], bool:dontBroadcast ) {
     if ( !bSecondRound ) {    
         decl Float:tankFlows[2];
+        decl String:cfgName[128];
         
         L4D2_GetVersusTankFlowPercent(tankFlows);
         iTankFlow = RoundToNearest(tankFlows[0] * 100.0);
@@ -72,7 +75,8 @@ public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], b
         
         // XXX: minus by 5% as tank spawns at this position when survivors are a bit earlier
         iTankFlow -= 5;
-        Format(sTankFlowMsg, sizeof(sTankFlowMsg), "[Deathwish] The tank will spawn at %d%s through the map.", iTankFlow, "%%");
+        GetCfgName(cfgName, sizeof(cfgName));
+        Format(sTankFlowMsg, sizeof(sTankFlowMsg), "[%s] The tank will spawn at %d%s through the map.", cfgName, iTankFlow, "%%");
     }
     
     PrintToChatAll(sTankFlowMsg);
@@ -90,11 +94,11 @@ public Action:TankCmd(client, args) {
 }
 
 AdjustTankFlow() {
-    new minFlow = LGO_GetMapValueInt("tank_ban_flow_min");
-    new maxFlow = LGO_GetMapValueInt("tank_ban_flow_max");
+    new minFlow = LGO_GetMapValueInt("tank_ban_flow_min", -1);
+    new maxFlow = LGO_GetMapValueInt("tank_ban_flow_max", -1);
     
     // Check inputs exist and are sensible
-    if ( minFlow == 0 || maxFlow == 0 || maxFlow < minFlow ) {
+    if ( minFlow == -1 || maxFlow == -1 || maxFlow < minFlow ) {
         return;
     }
 

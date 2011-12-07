@@ -5,6 +5,8 @@
 #include <left4downtown>
 #include <mapinfo>
 
+#include "cfgname.sp"
+
 new bool:distanceEnabled = false;
 
 new Float:fDesiredHb = 1.0;
@@ -16,7 +18,7 @@ new Handle:cvar_desiredHb;
 public Plugin:myinfo = {
     name        = "L4D2 Custom Map Distance",
     author      = "Jahze",
-    version     = "1.0",
+    version     = "1.1",
     description = "Enables custom map distance read from mapinfo.txt"
 }
 
@@ -26,7 +28,7 @@ public OnPluginStart() {
     
     // XXX: The desired health bonus ratio. Set this to what you would set SM_healthbonusratio to.
     // l4d2_scoremod.sp doesn't work with l4d2lib as the call to get max_distance uses a literal default
-    // value or something ("Invalid address value")
+    // value or something ("Invalid address value") -- too lazy to figure it out just yet
     cvar_desiredHb = CreateConVar("l4d_desired_hb", "1", "The desired health bonus ratio (this is a hack)", FCVAR_PLUGIN);
     HookConVarChange(cvar_desiredHb, DesiredHbChange);
     
@@ -66,6 +68,7 @@ public Action:SetMapDistance( Handle:timer ) {
         }
         
         new iDistance = LGO_GetMapValueInt("max_distance", iDefaultDistance);
+        
         L4D_SetVersusMaxCompletionScore(iDistance);
         
         if ( cvar_hbRatio != INVALID_HANDLE ) {
@@ -89,7 +92,10 @@ public DesiredHbChange( Handle:cvar, const String:oldValue[], const String:newVa
 
 public Action:AnnounceMapDistance( Handle:event, const String:name[], bool:dontBroadcast ) {
     decl String:msg[128];
+    decl String:cfgName[128];
     
-    Format(msg, sizeof(msg), "[Deathwish] This map is worth %d distance points.", L4D_GetVersusMaxCompletionScore());
+    GetCfgName(cfgName, sizeof(cfgName));
+    
+    Format(msg, sizeof(msg), "[%s] This map is worth %d distance points.", cfgName, L4D_GetVersusMaxCompletionScore());
     PrintToChatAll(msg);
 }

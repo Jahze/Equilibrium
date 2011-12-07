@@ -10,6 +10,7 @@ const	START_SAFEROOM			= 1 << 0;
 const	END_SAFEROOM			= 1 << 1;
 
 new Handle:kMIData = INVALID_HANDLE;
+new Handle:cvar_cfgname = INVALID_HANDLE;
 
 static bool:MapDataAvailable;
 static Float:Start_Point[3];
@@ -25,8 +26,13 @@ static Float:fLocTemp[MAXPLAYERS][3];
 BuildConfigPath(String:buffer[], maxlength, const String:sFileName[])
 {
     decl String:PathToSM[PLATFORM_MAX_PATH];
-    BuildPath(Path_SM, PathToSM, sizeof(PathToSM), "../../cfg/cfgogl/deathwish");
-    Format(buffer, maxlength, "%s/%s", PathToSM, sFileName);
+    decl String:cfgName[PLATFORM_MAX_PATH];
+    
+    BuildPath(Path_SM, PathToSM, sizeof(PathToSM), "../../cfg/cfgogl");
+    
+    GetConVarString(cvar_cfgname, cfgName, sizeof(cfgName));
+    
+    Format(buffer, maxlength, "%s/%s/%s", PathToSM, cfgName, sFileName);
 }
 
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
@@ -38,13 +44,18 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 
 public OnPluginStart()
 {
-	MI_KV_Load();
-	
 	// RegAdminCmd("confogl_midata_reload", MI_KV_CmdReload, ADMFLAG_CONFIG);
 	RegAdminCmd("confogl_midata_save", MI_KV_CmdSave, ADMFLAG_CONFIG);
 	RegAdminCmd("confogl_save_location", MI_KV_CmdSaveLoc, ADMFLAG_CONFIG);
 	
 	HookEvent("player_disconnect", PlayerDisconnect_Event);
+	
+	cvar_cfgname = CreateConVar("confogl_cfg_name", "", "This should be set to the name of your config", FCVAR_PLUGIN);
+	HookConVarChange(cvar_cfgname, cfgnameSet);
+}
+
+public cfgnameSet( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
+    MI_KV_Load();
 }
 
 MI_APL()
@@ -427,7 +438,7 @@ public _native_GetMapValueInt(Handle:plugin, numParams)
 	new String:key[len+1];
 	GetNativeString(1, key, len+1);
 	
-	defval = GetNativeCellRef(2);
+	defval = GetNativeCell(2);
 	
 	return GetMapValueInt(key, defval);
 }
@@ -440,7 +451,7 @@ public _native_GetMapValueFloat(Handle:plugin, numParams)
 	new String:key[len+1];
 	GetNativeString(1, key, len+1);
 	
-	defval = GetNativeCellRef(2);
+	defval = GetNativeCell(2);
 	
 	return _:GetMapValueFloat(key, defval);
 }
