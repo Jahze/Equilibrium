@@ -3,7 +3,8 @@
 #include <sourcemod>
 #include <sdkhooks>
 
-#define BOOMER_ZOMBIE_CLASS 2
+#define BOOMER_ZOMBIE_CLASS     2
+#define SPITTER_ZOMBIE_CLASS    4
 
 new bool:bLateLoad;
 new Handle:cvar_bashKills;
@@ -54,10 +55,10 @@ bool:IsSI( client ) {
         return false;
     }
     
-    // Allow boomer m2 kills
+    // Allow boomer and spitter m2 kills
     new playerClass = GetEntProp(client, Prop_Send, "m_zombieClass");
     
-    if ( playerClass == BOOMER_ZOMBIE_CLASS ) {
+    if ( playerClass == BOOMER_ZOMBIE_CLASS || playerClass == SPITTER_ZOMBIE_CLASS ) {
         return false;
     }
     
