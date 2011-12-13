@@ -11,6 +11,8 @@
         "max_tank_z"        "1200.000000"
         "tamk_warpto"       "2168.357666 5803.427734 2464.031250"
         "max_distance"      "300"
+        "tank_ban_flow_min" "0"
+        "tank_ban_flow_max" "70"
         "ItemLimits"
         {
             "molotov"       "0"
@@ -191,6 +193,8 @@
         "start_extra_dist"  "200.000000"
         "end_dist"          "300.000000"
         "max_distance"      "700"
+        "tank_ban_flow_min" "20"
+        "tank_ban_flow_max" "30"
     }
     "c4m4_milltown_b"
     {
@@ -257,6 +261,8 @@
         "start_extra_dist"  "200.000000"
         "end_dist"          "350.000000"
         "max_distance"      "700"
+        "tank_ban_flow_min" "80"
+        "tank_ban_flow_max" "100"
     }
     "c5m5_bridge"
     {
