@@ -70,8 +70,6 @@ public Action:DeathwishPlayerLeftStartArea( Handle:event, const String:name[], b
         // Block certain tank spawns based on map info
         AdjustTankFlow();
         
-        // XXX: minus by 5% as tank spawns at this position when survivors are a bit earlier
-        iTankFlow -= 5;
         Format(sTankFlowMsg, sizeof(sTankFlowMsg), "[Tank] The tank will spawn at %d%s through the map.", iTankFlow, "%%");
     }
     
