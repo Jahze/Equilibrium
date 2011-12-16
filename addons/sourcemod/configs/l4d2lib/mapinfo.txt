@@ -9,7 +9,7 @@
         "end_dist"          "200.000000"
         "tank_z_fix"        "1"
         "max_tank_z"        "1200.000000"
-        "tamk_warpto"       "2168.357666 5803.427734 2464.031250"
+        "tank_warpto"       "2168.357666 5803.427734 2464.031250"
         "max_distance"      "300"
         "tank_ban_flow_min" "0"
         "tank_ban_flow_max" "70"
@@ -432,7 +432,7 @@
         "end_dist"          "332.486664"
         "tank_z_fix"        "1"
         "max_tank_z"        "4000.000000"
-        "tamk_warpto"       "13428.627930 15072.313477 486.031250"
+        "tank_warpto"       "13428.627930 15072.313477 486.031250"
         "max_distance"      "500"
     }
     "c8m5_rooftop"
@@ -490,8 +490,9 @@
         "start_point"       "2019.751953 4538.839844 -34.821182"
         "start_dist"        "76.933571"
         "start_extra_dist"  "317.183868"
-        "end_point"         "3792.103271 -4653.910645 -151.968750"
-        "end_dist"          "758.440063"
+        "end_point"         "3805.135254 -4660.525391 -151.968750"
+        "end_dist"          "795.922058"
+
     }
     "c11m1_greenhouse"
     {
