@@ -129,6 +129,8 @@
         "start_extra_dist"  "0.000000"
         "end_dist"          "200.000000"
         "max_distance"      "500"
+        "tank_ban_flow_min" "45"
+        "tank_ban_flow_max" "60"
     }
     "c3m2_swamp"
     {
@@ -184,6 +186,8 @@
         "start_extra_dist"  "250.000000"
         "end_dist"          "150.000000"
         "max_distance"      "500"
+        "tank_ban_flow_min" "85"
+        "tank_ban_flow_max" "100"
     }
     "c4m3_sugarmill_b"
     {
@@ -251,7 +255,7 @@
         "end_dist"          "250.000000"
         "max_distance"      "600"
         "tank_ban_flow_min" "50"
-        "tank_ban_flow_max" "60"
+        "tank_ban_flow_max" "70"
     }
     "c5m4_quarter"
     {
