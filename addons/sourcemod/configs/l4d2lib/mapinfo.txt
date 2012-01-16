@@ -183,7 +183,7 @@
         "start_dist"        "100.000000"
         "start_extra_dist"  "250.000000"
         "end_dist"          "150.000000"
-        "max_distance"      "600"
+        "max_distance"      "500"
     }
     "c4m3_sugarmill_b"
     {
@@ -192,7 +192,7 @@
         "start_dist"        "50.000000"
         "start_extra_dist"  "200.000000"
         "end_dist"          "300.000000"
-        "max_distance"      "700"
+        "max_distance"      "600"
         "tank_ban_flow_min" "20"
         "tank_ban_flow_max" "30"
     }
@@ -501,7 +501,7 @@
         "start_extra_dist"  "577.638000"
         "end_point"         "5274.120605 2715.548584 88.261955"
         "end_dist"          "314.896759"
-        "max_distance"      "300"
+        "max_distance"      "200"
         "ItemLimits"
         {
             "molotov"       "0"
@@ -551,7 +551,7 @@
         "start_extra_dist"  "753.082764"
         "end_point"         "-6468.546387 -6767.946777 377.974670"
         "end_dist"          "275.937225"
-        "max_distance"      "400"
+        "max_distance"      "200"
         "ItemLimits"
         {
             "molotov"       "0"
