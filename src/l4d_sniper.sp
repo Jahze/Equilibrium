@@ -224,7 +224,7 @@ public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroad
 }
 
 SniperVModel(String:buf[], len) {
-    if ( StrContains(sSniperType, "awp", false) ) {
+    if ( StrContains(sSniperType, "awp", false) != -1 ) {
         strcopy(buf, len, AWP_V_MODEL);
     }
     else {
@@ -233,7 +233,7 @@ SniperVModel(String:buf[], len) {
 }
 
 SniperWModel(String:buf[], len) {
-    if ( StrContains(sSniperType, "awp", false) ) {
+    if ( StrContains(sSniperType, "awp", false) != -1 ) {
         strcopy(buf, len, AWP_W_MODEL);
     }
     else {
@@ -242,7 +242,7 @@ SniperWModel(String:buf[], len) {
 }
 
 SniperWeaponName(String:buf[], len) {
-    if ( StrContains(sSniperType, "awp", false) ) {
+    if ( StrContains(sSniperType, "awp", false) != -1 ) {
         strcopy(buf, len, AWP_WEAPON_NAME);
     }
     else {
