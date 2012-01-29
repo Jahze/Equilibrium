@@ -12,23 +12,15 @@
 #define SCOUT_V_MODEL       "models/v_models/v_snip_scout.mdl"
 #define SCOUT_WEAPON_NAME   "weapon_sniper_scout"
 
-new SNIPER_CLIP_SIZE = 10;
-new SNIPER_DAMAGE    = 135;
-
 new bool:bHooked;
-new bool:bTweaked;
 
 new iSniperLimit        = 1;
 new iSniperLastWeapon   = -1;
 new iSniperLastClient   = -1;
-new iDefaultClipSize    = 15;
-new iDefaultDamage      = 90;
 new String:sSniperLastWeapon[64];
 new String:sSniperType[64];
 
 new Handle:cvar_sniperLimit;
-new Handle:cvar_sniperClipSize;
-new Handle:cvar_sniperDamage;
 new Handle:cvar_sniperType;
 
 public Plugin:myinfo =
@@ -36,18 +28,12 @@ public Plugin:myinfo =
     name        = "L4D2 Sniper",
     author      = "Jahze",
     version     = "3.0",
-    description = "Plugin that allows limited pickups and buffing of AWP or scout"
+    description = "Plugin that allows limited pickups of AWP or scout"
 }
 
 public OnPluginStart() {
     cvar_sniperLimit = CreateConVar("l4d_sniper_limit", "1", "Limits the maximum number of snipers per team", FCVAR_PLUGIN);
     HookConVarChange(cvar_sniperLimit, SniperLimitChange);
-    
-    cvar_sniperClipSize = CreateConVar("l4d_sniper_clip", "8", "Bullets in a sniper clip", FCVAR_PLUGIN);
-    HookConVarChange(cvar_sniperClipSize, SniperClipSizeChange);
-    
-    cvar_sniperDamage = CreateConVar("l4d_sniper_damage", "135", "Damage per sniper bullet", FCVAR_PLUGIN);
-    HookConVarChange(cvar_sniperDamage, SniperDamageChange);
     
     cvar_sniperType = CreateConVar("l4d_sniper_type", "scout", "Type of sniper (AWP or scout)", FCVAR_PLUGIN);
     HookConVarChange(cvar_sniperType, SniperTypeChange);
@@ -56,7 +42,6 @@ public OnPluginStart() {
     GetConVarString(cvar_sniperType, sSniperType, sizeof(sSniperType));
     
     bHooked  = false;
-    bTweaked = false;
 }
 
 public OnPluginEnd() {
@@ -73,14 +58,7 @@ PluginDisable() {
         UnhookEvent("player_use", SniperPlayerUse);
         UnhookEvent("weapon_drop", SniperWeaponDrop);
         
-        decl String:sSniperName[64];
-        SniperWeaponName(sSniperName, sizeof(sSniperName));
-        
-        L4D2_SetIntWeaponAttribute(sSniperName, L4D2IWA_ClipSize, iDefaultClipSize);
-        L4D2_SetIntWeaponAttribute(sSniperName, L4D2IWA_Damage, iDefaultDamage);
-        
         bHooked  = false;
-        bTweaked = false;
     }
 }
 
@@ -107,35 +85,6 @@ PrecacheSniper() {
     new index = CreateEntityByName(sSniperName);
     DispatchSpawn(index);
     RemoveEdict(index);
-}
-
-TweakSniper() {
-    if ( !bTweaked ) {
-        decl String:sSniperName[64];
-        SniperWeaponName(sSniperName, sizeof(sSniperName));
-        
-        iDefaultClipSize = L4D2_GetIntWeaponAttribute(sSniperName, L4D2IWA_ClipSize);
-        iDefaultDamage   = L4D2_GetIntWeaponAttribute(sSniperName, L4D2IWA_Damage);
-        L4D2_SetIntWeaponAttribute(sSniperName, L4D2IWA_ClipSize, SNIPER_CLIP_SIZE);
-        L4D2_SetIntWeaponAttribute(sSniperName, L4D2IWA_Damage, SNIPER_DAMAGE);
-        bTweaked = true;
-    }
-}
-
-public SniperClipSizeChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
-    decl String:sSniperName[64];
-    SniperWeaponName(sSniperName, sizeof(sSniperName));
-    
-    SNIPER_CLIP_SIZE = StringToInt(newValue);
-    L4D2_SetIntWeaponAttribute(sSniperName, L4D2IWA_ClipSize, SNIPER_CLIP_SIZE);
-}
-
-public SniperDamageChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
-    decl String:sSniperName[64];
-    SniperWeaponName(sSniperName, sizeof(sSniperName));
-    
-    SNIPER_DAMAGE = StringToInt(newValue);
-    L4D2_SetIntWeaponAttribute(sSniperName, L4D2IWA_Damage, SNIPER_DAMAGE);
 }
 
 public SniperLimitChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
@@ -212,9 +161,6 @@ public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroad
                     SetCommandFlags("give", giveFlags);
                 }
             }
-        }
-        else {
-            TweakSniper();
         }
     }
     
