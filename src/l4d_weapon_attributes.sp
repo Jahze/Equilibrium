@@ -7,6 +7,14 @@
 #define MAX_ATTRS           19
 #define TANK_ZOMBIE_CLASS   8
 
+public Plugin:myinfo =
+{
+    name        = "L4D2 Weapon Attributes",
+    author      = "Jahze",
+    version     = "1.0",
+    description = "Allowing tweaking of the attributes of all weapons"
+};
+
 new iWeaponAttributes[MAX_ATTRS] = {
     L4D2IWA_Damage,
     L4D2IWA_Bullets,
@@ -245,7 +253,7 @@ public Action:TankSpawned( Handle:event, const String:name[], bool:dontBroadcast
 }
 
 public Action:PlayerDeath( Handle:event, const String:name[], bool:dontBroadcast ) {
-    if ( bTankSpawned ) {
+    if ( bTankSpawned && iTankClient == GetClientOfUserId(GetEventInt(event, "userid")) ) {
         CreateTimer(0.1, FindTankDelay);
     }
 }
@@ -268,17 +276,14 @@ public Action:DamageBuffVsTank( victim, &attacker, &inflictor, &Float:damage, &d
     }
     
     decl String:sWeaponName[128];
-    GetEdictClassname(inflictor, sWeaponName, sizeof(sWeaponName));    
+    GetClientWeapon(attacker, sWeaponName, sizeof(sWeaponName));
     new Float:fBuff = KvGetFloat(hTankDamageKVs, sWeaponName, 0.0);
     
     if ( !fBuff ) {
-        PrintToChatAll("%.2f damage done to tank", damage);
         return Plugin_Continue;
     }
     
     damage *= fBuff;
-    
-    PrintToChatAll("%.2f damage done to tank with %.2f multiplier", damage, fBuff);
     
     return Plugin_Changed;
 }
