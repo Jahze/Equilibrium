@@ -27,7 +27,7 @@ public Plugin:myinfo =
 {
     name        = "L4D2 Sniper",
     author      = "Jahze",
-    version     = "3.0",
+    version     = "3.1",
     description = "Plugin that allows limited pickups of AWP or scout"
 }
 
