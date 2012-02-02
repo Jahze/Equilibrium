@@ -91,7 +91,6 @@ public Action:RoundStartDelay( Handle:timer ) {
             continue;
         }
         
-        LogMessage("%s was hooked", sTargetName);
         HookSingleEntityOutput(iEntity, "OnTrigger", CarAlarmLogicRelayTriggered);
     }
     
@@ -100,7 +99,6 @@ public Action:RoundStartDelay( Handle:timer ) {
     while ( (iEntity = FindEntityByClassname(iEntity, "prop_car_alarm")) != -1 ) {
         GetEntityName(iEntity, sTargetName, sizeof(sTargetName));
         
-        LogMessage("%s car alarm was hooked", sTargetName);
         HookSingleEntityOutput(iEntity, "OnCarAlarmStart", CarAlarmTriggered); 
     }
 }
@@ -109,14 +107,9 @@ public CarAlarmLogicRelayTriggered( const String:output[], caller, activator, Fl
     new sTargetName[128];
     GetEntityName(caller, sTargetName, sizeof(sTargetName));
     
-    LogMessage("%s was triggered %s %d", output, sTargetName, bSecondRound);
-    
     if ( !bSecondRound ) {
         if ( !CarWasTriggered(sTargetName) ) {
             PushArrayString(hFirstRoundCars, sTargetName);
-        }
-        else {
-            LogMessage("Not adding as the car was triggered");
         }
     }
     else {
@@ -135,11 +128,7 @@ public Action:PatchAlarmedCars( Handle:timer ) {
         GetArrayString(hFirstRoundCars, i, sEntName, sizeof(sEntName));
         
         if ( FindStringInArray(hSecondRoundCars, sEntName) == -1 ) {
-            LogMessage("%s was fired 1st round but not 2nd", sEntName);
             DisableCar(sEntName);
-        }
-        else {
-            LogMessage("%s fired in 1st and 2nd round", sEntName);
         }
     }
     
@@ -147,11 +136,7 @@ public Action:PatchAlarmedCars( Handle:timer ) {
         GetArrayString(hSecondRoundCars, i, sEntName, sizeof(sEntName));
         
         if ( FindStringInArray(hFirstRoundCars, sEntName) == -1 ) {
-            LogMessage("%s was fired 2nd round but not 1st", sEntName);
             EnableCar(sEntName);
-        }
-        else {
-            LogMessage("%s fired in 1st and 2nd round", sEntName);
         }
     }
 }
@@ -161,12 +146,10 @@ bool:ExtractCarName( const String:sName[], String:sBuffer[], iSize ) {
 }
 
 DisableCar( const String:sName[] ) {
-    LogMessage("Disabling %s", sName);
     TriggerCarRelay(sName, false);
 }
 
 EnableCar( const String:sName[] ) {
-    LogMessage("Enabling %s", sName);
     TriggerCarRelay(sName, true);
 }
 
@@ -178,7 +161,6 @@ TriggerCarRelay( const String:sName[], bool:bOn ) {
         return;
     }
     
-    LogMessage("Got name");
     StrCat(sCarName, sizeof(sCarName), "-relay_caralarm_");
     
     if ( bOn ) {
@@ -191,11 +173,7 @@ TriggerCarRelay( const String:sName[], bool:bOn ) {
     iEntity = FindEntityByName(sCarName, "logic_relay");
     
     if ( iEntity != -1 ) {
-        LogMessage("Triggering %s", sCarName);
         AcceptEntityInput(iEntity, "Trigger");
-    }
-    else {
-        LogMessage("Couldn't find %s", sCarName);
     }
 }
 
@@ -209,9 +187,6 @@ public CarAlarmTriggered( const String:output[], caller, activator, Float:delay 
     
     GetEntityName(caller, sTargetName, sizeof(sTargetName));
     ExtractCarName(sTargetName, sCarName, sizeof(sCarName));
-    
-    LogMessage("%s was triggered %s %d", output, sTargetName, bSecondRound);
-    LogMessage("Pushing %s onto triggered cars", sCarName);
     
     PushArrayString(hFirstRoundTriggeredCars, sCarName);
 }
