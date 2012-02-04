@@ -270,6 +270,10 @@ public Action:FindTankDelay( Handle:timer ) {
 }
 
 public Action:DamageBuffVsTank( victim, &attacker, &inflictor, &Float:damage, &damageType, &weapon, Float:damageForce[3], Float:damagePosition[3] ) {
+    if ( !attacker ) {
+        return Plugin_Continue;
+    }
+    
     if ( !IsTank(victim) ) {
         SDKUnhook(victim, SDKHook_OnTakeDamage, DamageBuffVsTank);
         return Plugin_Continue;
