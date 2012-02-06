@@ -245,23 +245,31 @@ public Action:RoundStart( Handle:event, const String:name[], bool:dontBroadcast 
 }
 
 public Action:TankSpawned( Handle:event, const String:name[], bool:dontBroadcast ) {
-    if ( !bTankSpawned ) {
-        iTankClient = GetClientOfUserId(GetEventInt(event, "userid"));
+    new client = GetClientOfUserId(GetEventInt(event, "userid"));
+    
+    if ( iTankClient != client ) {
+        iTankClient = client;
         SDKHook(iTankClient, SDKHook_OnTakeDamage, DamageBuffVsTank);
         bTankSpawned = true;
     }
 }
 
 public Action:PlayerDeath( Handle:event, const String:name[], bool:dontBroadcast ) {
-    if ( bTankSpawned && iTankClient == GetClientOfUserId(GetEventInt(event, "userid")) ) {
-        CreateTimer(0.1, FindTankDelay);
+    new client = GetClientOfUserId(GetEventInt(event, "userid"));
+    if ( bTankSpawned && iTankClient == client ) {
+        CreateTimer(0.1, FindTankDelay, client);
     }
 }
 
-public Action:FindTankDelay( Handle:timer ) {
+public Action:FindTankDelay( Handle:timer, any:iOldTankClient ) {
+    if ( iTankClient != iOldTankClient ) {
+        return;
+    }
+    
     iTankClient = FindTank();
     
     if ( iTankClient != -1 ) {
+        SDKUnhook(iOldTankClient, SDKHook_OnTakeDamage, DamageBuffVsTank);
         SDKHook(iTankClient, SDKHook_OnTakeDamage, DamageBuffVsTank);
     }
     else {
