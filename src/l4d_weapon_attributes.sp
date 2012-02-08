@@ -81,11 +81,14 @@ new String:sWeaponAttrShortName[MAX_ATTRS][32] = {
     "tankdamagemult"
 };
 
-new iTankClient = -1;
+new bool:bLateLoad;
 
-new bool:bHooked = false;
-new bool:bTankSpawned = false;
 new Handle:hTankDamageKVs;
+
+public APLRes:AskPluginLoad2( Handle:plugin, bool:late, String:error[], errMax ) {
+    bLateLoad = late;
+    return APLRes_Success;    
+}
 
 public OnPluginStart() {
     RegServerCmd("sm_weapon", Weapon);
@@ -93,33 +96,23 @@ public OnPluginStart() {
     
     hTankDamageKVs = CreateKeyValues("DamageVsTank");
     
-    HookEvents();
+    if ( bLateLoad ) {
+        for ( new i = 1; i < MaxClients+1; i++ ) {
+            if ( IsClientInGame(i) ) {
+                SDKHook(i, SDKHook_OnTakeDamage, DamageBuffVsTank);
+            }
+        }
+    }
+}
+
+public OnClientPutInServer( client ) {
+    SDKHook(client, SDKHook_OnTakeDamage, DamageBuffVsTank);
 }
 
 public OnPluginEnd() {
     if ( hTankDamageKVs != INVALID_HANDLE ) {
         CloseHandle(hTankDamageKVs);
         hTankDamageKVs = INVALID_HANDLE;
-    }
-    
-    UnhookEvents();
-}
-
-HookEvents() {
-    if ( !bHooked ) {
-        HookEvent("tank_spawn", TankSpawned);
-        HookEvent("player_death", PlayerDeath);
-        HookEvent("round_start", RoundStart);
-        bHooked = true;
-    }
-}
-
-UnhookEvents() {
-    if ( bHooked ) {
-        UnhookEvent("tank_spawn", TankSpawned);
-        UnhookEvent("player_death", PlayerDeath);
-        UnhookEvent("round_start", RoundStart);
-        bHooked = false;
     }
 }
 
@@ -239,51 +232,12 @@ public Action:WeaponAttributes( client, args ) {
     }
 }
 
-public Action:RoundStart( Handle:event, const String:name[], bool:dontBroadcast ) {
-    bTankSpawned = false;
-    iTankClient = -1;
-}
-
-public Action:TankSpawned( Handle:event, const String:name[], bool:dontBroadcast ) {
-    new client = GetClientOfUserId(GetEventInt(event, "userid"));
-    
-    if ( iTankClient != client ) {
-        iTankClient = client;
-        SDKHook(iTankClient, SDKHook_OnTakeDamage, DamageBuffVsTank);
-        bTankSpawned = true;
-    }
-}
-
-public Action:PlayerDeath( Handle:event, const String:name[], bool:dontBroadcast ) {
-    new client = GetClientOfUserId(GetEventInt(event, "userid"));
-    if ( bTankSpawned && iTankClient == client ) {
-        CreateTimer(0.1, FindTankDelay, client);
-    }
-}
-
-public Action:FindTankDelay( Handle:timer, any:iOldTankClient ) {
-    if ( iTankClient != iOldTankClient ) {
-        return;
-    }
-    
-    iTankClient = FindTank();
-    
-    if ( iTankClient != -1 ) {
-        SDKUnhook(iOldTankClient, SDKHook_OnTakeDamage, DamageBuffVsTank);
-        SDKHook(iTankClient, SDKHook_OnTakeDamage, DamageBuffVsTank);
-    }
-    else {
-        bTankSpawned = false;
-    }
-}
-
 public Action:DamageBuffVsTank( victim, &attacker, &inflictor, &Float:damage, &damageType, &weapon, Float:damageForce[3], Float:damagePosition[3] ) {
     if ( !attacker ) {
         return Plugin_Continue;
     }
     
     if ( !IsTank(victim) ) {
-        SDKUnhook(victim, SDKHook_OnTakeDamage, DamageBuffVsTank);
         return Plugin_Continue;
     }
     
@@ -298,16 +252,6 @@ public Action:DamageBuffVsTank( victim, &attacker, &inflictor, &Float:damage, &d
     damage *= fBuff;
     
     return Plugin_Changed;
-}
-
-FindTank() {
-    for ( new i = 1; i <= MaxClients; i++ ) {
-        if ( IsTank(i) ) {
-            return i;
-        }
-    }
-    
-    return -1;
 }
 
 bool:IsTank( client ) {
