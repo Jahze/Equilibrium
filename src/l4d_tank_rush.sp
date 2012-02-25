@@ -8,12 +8,11 @@ const TANK_ZOMBIE_CLASS = 8;
 
 new bool:bSecondRound;
 new bool:bTankAlive;
+new bool:bHooked;
 
 new iDistance;
-new Float:fHbRatio;
 
-new Handle:cvar_tankRush;
-new Handle:cvar_hbRatio;
+new Handle:cvar_noTankRush;
 
 public Plugin:myinfo = {
     name        = "L4D2 No Tank Rush",
@@ -23,11 +22,10 @@ public Plugin:myinfo = {
 };
 
 public OnPluginStart() {
-    cvar_tankRush = CreateConVar("l4d_tank_rush", "1", "Prevents survivor team from accumulating points whilst the tank is alive", FCVAR_PLUGIN);
-    HookConVarChange(cvar_tankRush, TankRushChange);
+    cvar_noTankRush = CreateConVar("l4d_no_tank_rush", "1", "Prevents survivor team from accumulating points whilst the tank is alive", FCVAR_PLUGIN);
+    HookConVarChange(cvar_noTankRush, NoTankRushChange);
     
-    cvar_hbRatio = FindConVar("SM_healthbonusratio");
-    
+    bHooked = false;
     PluginEnable();
 }
 
@@ -40,20 +38,28 @@ public OnMapStart() {
 }
 
 PluginEnable() {
-    HookEvent("round_start", RoundStart);
-    HookEvent("round_end", RoundEnd);
-    HookEvent("tank_spawn", TankSpawn);
-    HookEvent("player_death", TankKilled);
+    if ( !bHooked ) {
+        HookEvent("round_start", RoundStart);
+        HookEvent("round_end", RoundEnd);
+        HookEvent("tank_spawn", TankSpawn);
+        HookEvent("player_death", TankKilled);
+        
+        bHooked = true;
+    }
 }
 
 PluginDisable() {
-    UnhookEvent("round_start", RoundStart);
-    UnhookEvent("round_end", RoundEnd);
-    UnhookEvent("tank_spawn", TankSpawn);
-    UnhookEvent("player_death", TankKilled);
+    if ( bHooked ) {
+        UnhookEvent("round_start", RoundStart);
+        UnhookEvent("round_end", RoundEnd);
+        UnhookEvent("tank_spawn", TankSpawn);
+        UnhookEvent("player_death", TankKilled);
+        
+        bHooked = false;
+    }
 }
 
-public TankRushChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
+public NoTankRushChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
     if ( StringToInt(newValue) == 0 ) {
         PluginDisable();
     }
@@ -67,7 +73,6 @@ public Action:RoundStart( Handle:event, const String:name[], bool:dontBroadcast 
     
     if ( bSecondRound ) {
         L4D_SetVersusMaxCompletionScore(iDistance);
-        SetConVarFloat(cvar_hbRatio, fHbRatio);
     }
 }
 
@@ -79,7 +84,6 @@ public Action:TankSpawn( Handle:event, const String:name[], bool:dontBroadcast )
     if ( !bTankAlive ) {
         bTankAlive = true;
         iDistance  = L4D_GetVersusMaxCompletionScore();
-        fHbRatio   = GetConVarFloat(cvar_hbRatio);
         
         L4D_SetVersusMaxCompletionScore(0);
     }
@@ -97,7 +101,6 @@ public Action:TankKilledDelay( Handle:timer ) {
     if ( FindTank() == -1 ) {
         bTankAlive = false;
         L4D_SetVersusMaxCompletionScore(iDistance);
-        SetConVarFloat(cvar_hbRatio, fHbRatio);
     }
 }
 
