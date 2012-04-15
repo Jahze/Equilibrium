@@ -3,6 +3,10 @@ Equilibrium 1.3
 * Fixed the tank spawn ban for cane field tanks of Hard Rain 3.
 * Fixed bugs with the plugin that forces equal alarmed cars.
 * Slightly increased chances of silenced SMG when CS:S weapons would spawn.
+* The witch percentage is announced along with the tank percentage.
+* !tank and !witch can now be used before the round goes live.
+* !tank and !witch will display the percentage to everyone on the same team of the person who used it.
+* Updated the tank/witch percentage plugin to be in terms on survivor distance, rather than where the boss will spawn.
 
 
 
