@@ -198,7 +198,7 @@
         "end_dist"          "300.000000"
         "max_distance"      "600"
         "tank_ban_flow_min" "20"
-        "tank_ban_flow_max" "30"
+        "tank_ban_flow_max" "40"
     }
     "c4m4_milltown_b"
     {
