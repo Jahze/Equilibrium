@@ -1,0 +1,56 @@
+Equilibrium 1.3
+---------------
+* Fixed the tank spawn ban for cane field tanks of Hard Rain 3.
+* Fixed bugs with the plugin that forces equal alarmed cars.
+* Slightly increased chances of silenced SMG when CS:S weapons would spawn.
+
+
+
+Equilibrium 1.2
+---------------
+* Reverted shotgun weapon attributes back to their vanilla values.
+
+
+
+Equilibrium 1.1
+---------------
+
+* AWP replaced with Scout. The base damage and clip size is unchanged from the AWP.
+* Scout damage versus tanks is increased to 160 per shot (+25).
+* Shotgun damage versus tanks is increased to a maximum of 300 per shot (+60).
+* Shotgun damage drop off over range has been reduced by 10%.
+* Random alarmed cars will spawn in the same pattern for the second survivor team as they did for the first (thanks to Lord Nitro for help with this).
+* Fixed Parish 3 sewer tank ban.
+* Banned tank spawn on Hard Rain 2 after the survivors leave the elevator.
+* Banned tank spawn on Swamp Fever 1 whilst the ferry is crossing the river.
+* (Minor fix to scoremod to prevent "Custom max distance" being displayed to all players whenever anyone uses !health)
+
+
+
+Equilibrium 1.0
+---------------
+
+* Hunting Rifle replace by AWP.
+* AWP ammo reduced to 10/100.
+* AWP does 135 damage per shot.
+* AWP limited to 1 per team.
+* Special infected are no longer slowed down by survivor gunfire (including tank).
+* Special infected cannot be killed by m2 (excluding spitter and boomer).
+* Magnum limited to 2 per spawn.
+* Health bonus set at 2x map distance.
+* Maximum extra pills per map is 4.
+* No adrenaline shots.
+* No throwables.
+* Gas, propane and oxygen tanks removed.
+* Altered the distance points on some maps (!health will tell you the custom distance).
+* Spawn times at 16s.
+* Blocked the following tank spawns:
+  - dead centre 1 upstairs
+  - dark carnival 3 coaster
+  - hard rain 3 canefield
+  - parish 3 sewer
+  - parish 4 final alleyway
+* Both teams are told where the tank will spawn and can use !tank to see it again.
+* Tank hittables will not fade until the tank is dead.
+* Natural hordes removed.
+* Increased witch aggro range and slightly increased damage while incapped.
