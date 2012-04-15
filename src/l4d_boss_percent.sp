@@ -1,12 +1,12 @@
 #pragma semicolon 1
 
+#define L4D2UTIL_STOCKS_ONLY
+
 #include <sourcemod>
 #include <sdktools>
 #include <l4d2_direct>
 #include <l4d2lib>
-#undef REQUIRE_PLUGIN
 #include <l4d2util>
-#define REQUIRE_PLUGIN
 #include <left4downtown>
 
 public Plugin:myinfo = {
