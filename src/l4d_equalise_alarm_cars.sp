@@ -7,16 +7,16 @@ public Plugin:myinfo =
 {
     name        = "L4D2 Equalise Alarm Cars",
     author      = "Jahze",
-    version     = "1.0",
+    version     = "1.1",
     description = "Make the alarmed car spawns the same for each team in versus"
 };
 
 new bool:bHooked = false;
+new bool:bActivated = false;
 new bool:bSecondRound = false;
 new bool:bPatched = false;
 
 new Handle:hFirstRoundCars;
-new Handle:hFirstRoundTriggeredCars;
 new Handle:hSecondRoundCars;
 
 new Handle:hCvarEqAlarmCars;
@@ -26,7 +26,6 @@ public OnPluginStart() {
     HookConVarChange(hCvarEqAlarmCars, EqAlarmCarsChange);
     
     hFirstRoundCars = CreateArray(128);
-    hFirstRoundTriggeredCars = CreateArray(128);
     hSecondRoundCars = CreateArray(128);
     
     HookEvents();
@@ -37,11 +36,11 @@ public OnPluginStop() {
 }
 
 public OnMapStart() {
+    bActivated = false;
     bSecondRound = false;
     bPatched = false;
     
     ClearArray(hFirstRoundCars);
-    ClearArray(hFirstRoundTriggeredCars);
     ClearArray(hSecondRoundCars);
 }
 
@@ -84,6 +83,10 @@ public Action:RoundStartDelay( Handle:timer ) {
     new iEntity = -1;
     decl String:sTargetName[128];
     
+    if ( bSecondRound && !bActivated ) {
+        return;
+    }
+    
     while ( (iEntity = FindEntityByClassname(iEntity, "logic_relay")) != -1 ) {
         GetEntityName(iEntity, sTargetName, sizeof(sTargetName));
         
@@ -93,24 +96,27 @@ public Action:RoundStartDelay( Handle:timer ) {
         
         HookSingleEntityOutput(iEntity, "OnTrigger", CarAlarmLogicRelayTriggered);
     }
-    
-    iEntity = -1;
-    
-    while ( (iEntity = FindEntityByClassname(iEntity, "prop_car_alarm")) != -1 ) {
-        GetEntityName(iEntity, sTargetName, sizeof(sTargetName));
-        
-        HookSingleEntityOutput(iEntity, "OnCarAlarmStart", CarAlarmTriggered); 
-    }
 }
 
 public CarAlarmLogicRelayTriggered( const String:output[], caller, activator, Float:delay ) {
-    new sTargetName[128];
+    decl String:sTargetName[128];
     GetEntityName(caller, sTargetName, sizeof(sTargetName));
     
-    if ( !bSecondRound ) {
-        if ( !CarWasTriggered(sTargetName) ) {
-            PushArrayString(hFirstRoundCars, sTargetName);
+    if (IsValidEntity(activator)) {
+        decl String:sClassName[128];
+        GetEntityClassname(activator, sClassName, sizeof(sClassName));
+        
+        // If a car is turned off because of a tank punch or because it was
+        // triggered the activator is the car itself. When the cars get
+        // randomised the activator is the player who entered the trigger area.
+        if ( StrEqual(sClassName, "prop_alarm_car") ) {
+            return;
         }
+    }
+        
+    if ( !bSecondRound ) {
+        bActivated = true;
+        PushArrayString(hFirstRoundCars, sTargetName);
     }
     else {
         PushArrayString(hSecondRoundCars, sTargetName);
@@ -175,28 +181,6 @@ TriggerCarRelay( const String:sName[], bool:bOn ) {
     if ( iEntity != -1 ) {
         AcceptEntityInput(iEntity, "Trigger");
     }
-}
-
-public CarAlarmTriggered( const String:output[], caller, activator, Float:delay ) {
-    if ( bSecondRound ) {
-        return;
-    }
-    
-    decl String:sTargetName[128];
-    decl String:sCarName[128];
-    
-    GetEntityName(caller, sTargetName, sizeof(sTargetName));
-    ExtractCarName(sTargetName, sCarName, sizeof(sCarName));
-    
-    PushArrayString(hFirstRoundTriggeredCars, sCarName);
-}
-
-bool:CarWasTriggered( const String:sTargetName[] ) {
-    new String:sCarName[128];
-    
-    ExtractCarName(sTargetName, sCarName, sizeof(sCarName));
-    
-    return FindStringInArray(hFirstRoundTriggeredCars, sCarName) != -1;
 }
 
 FindEntityByName( const String:sName[], const String:sClassName[] ) {
