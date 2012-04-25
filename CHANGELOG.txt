@@ -7,6 +7,7 @@ Equilibrium 1.3
 * !tank and !witch can now be used before the round goes live.
 * !tank and !witch will display the percentage to everyone on the same team of the person who used it.
 * Updated the tank/witch percentage plugin to be in terms on survivor distance, rather than where the boss will spawn.
+* Increased the recharge timer for a jockey after a ledge hang to 10s (and prevent instant recharges).
 
 
 
