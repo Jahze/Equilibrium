@@ -80,7 +80,7 @@ public Action:BossCmd(client, args) {
     }
     
     for (new i = 1; i < MaxClients+1; i++) {
-        if (IsClientConnected(i) && L4D2_Team:GetClientTeam(i) == iTeam) {
+        if (IsClientConnected(i) && IsClientInGame(i) && L4D2_Team:GetClientTeam(i) == iTeam) {
             PrintBossPercents(i, iTankPercent, iWitchPercent);
         }
     }
