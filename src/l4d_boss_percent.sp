@@ -128,11 +128,7 @@ AdjustBossFlow() {
     new Float:fFlow = fCvarMinFlow + GetRandomFloat(0.0, fCvarFlowRange-fFlowRange);
     fFlow = fFlow >= fMinFlow ? fFlow + fFlowRange : fFlow;
     
-    new Float:fFlows[2];
-    fFlows[0] = fFlow;
-    fFlows[1] = fFlow;
-    
-    // XXX: Use this the l4dt2 function for now as StoreToAddress is broken
-    L4D2_SetVersusTankFlowPercent(fFlows);
+    L4D2Direct_SetVSTankFlowPercent(0, fFlow);
+    L4D2Direct_SetVSTankFlowPercent(1, fFlow);
 }
 
