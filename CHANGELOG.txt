@@ -8,7 +8,9 @@ Equilibrium 1.3
 * !tank and !witch will display the percentage to everyone on the same team of the person who used it.
 * Updated the tank/witch percentage plugin to be in terms of survivor distance, rather than where the boss will spawn.
 * Increased the recharge timer for a jockey after a ledge hang to 10s (and prevent instant recharges).
-* Fixed scratches doing double damage on jockeyed targets and tank punches instantly incapping them.
+* Players who have already played the tank will not get a chance to be the tank again until all other player have had a turn.
+* Tanks no longer pass between players, their rage meter is reset once instead.
+* Grace period before losing frustration with the tank increased to 20 seconds.
 
 
 
