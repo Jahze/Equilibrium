@@ -14,27 +14,29 @@ new String:teamBTank[32];
 new Handle:hTeamATanks;
 new Handle:hTeamBTanks;
 
+public Plugin:myinfo = {
+    name        = "L4D2 Tank Control",
+    author      = "Jahze",
+    version     = "1.0",
+    description = "Forces each player to play the tank once before resetting the pool."
+};
+
 public OnPluginStart() {
     hTeamATanks = CreateArray(32);
     hTeamBTanks = CreateArray(32);
 }
 
 public Action:L4D_OnTryOfferingTankBot(tank_index, &bool:enterStatis) {
-    PrintToChatAll("Tank is being offered");
-    
     if (!IsFakeClient(tank_index)) {
-        PrintToChatAll("The tank isn't a bot so reset rage");
-        //PrintHintText(tank_index, "One rage 
+        PrintHintText(tank_index, "Rage meter refilled!"); 
         SetTankFrustration(tank_index, 100);
         L4D2Direct_SetTankPassedCount(L4D2Direct_GetTankPassedCount() + 1);
-        PrintToChatAll("Incremented pass count");
         return Plugin_Handled;
     }
     
     ChooseTank(true);
     
     if (GetDesignatedTank() != -1) {
-        PrintToChatAll("Chosen tank is %N", GetDesignatedTank());
         ForceTankPlayer();
     }
     
@@ -52,7 +54,6 @@ static bool:HasBeenTank(client) {
     {
         decl String:name[32];
         GetArrayString(GameRules_GetProp("m_bAreTeamsFlipped") ? hTeamBTanks : hTeamATanks, i, name, sizeof(name));
-        PrintToChatAll("(%s) is in tank array %d", name, GameRules_GetProp("m_bAreTeamsFlipped"));
     }
     return (FindStringInArray(GameRules_GetProp("m_bAreTeamsFlipped") ? hTeamBTanks : hTeamATanks, SteamId) != -1);
 }
@@ -62,15 +63,10 @@ static ChooseTank(bool:bFirstPass) {
     new Handle:SteamIds = CreateArray(32);
     new bool:bTeamsFlipped = bool:GameRules_GetProp("m_bAreTeamsFlipped");
     
-    PrintToChatAll("bTeamsFlipped = %d", bTeamsFlipped);
-    
     for (new i = 1; i < MaxClients+1; i++) {
         if (!IsClientConnected(i) || !IsClientInGame(i)) {
             continue;
         }
-        
-        PrintToChatAll("%d should be connected and in game", i);
-        PrintToChatAll("%d, IsFakeClient=%d, IsInfected=%d, HasBeenTank=%d", i, IsFakeClient(i), IsInfected(i), HasBeenTank(i));
         
         if (IsFakeClient(i) || !IsInfected(i) || HasBeenTank(i)) {
             continue;
@@ -78,11 +74,9 @@ static ChooseTank(bool:bFirstPass) {
         
         GetClientAuthString(i, SteamId, sizeof(SteamId));
         PushArrayString(SteamIds, SteamId);
-        PrintToChatAll("(%s) added to the choices", SteamId);
     }
     
     if (GetArraySize(SteamIds) == 0) {
-        PrintToChatAll("No tanks found first_try = %d", bFirstPass);
         if (bFirstPass) {
             ClearArray(bTeamsFlipped ? hTeamBTanks : hTeamATanks);
             ChooseTank(false);
@@ -92,7 +86,6 @@ static ChooseTank(bool:bFirstPass) {
     
     new idx = GetRandomInt(0, GetArraySize(SteamIds)-1);
     GetArrayString(SteamIds, idx, bTeamsFlipped ? teamBTank : teamATank, sizeof(teamBTank));
-    PrintToChatAll("Adding %s to played tanks", bTeamsFlipped ? teamBTank : teamATank);
     PushArrayString(bTeamsFlipped ? hTeamBTanks : hTeamATanks, bTeamsFlipped ? teamBTank : teamATank);
 }
 
