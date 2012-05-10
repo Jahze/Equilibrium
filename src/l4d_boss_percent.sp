@@ -35,9 +35,7 @@ public OnPluginStart() {
 public LeftStartAreaEvent( ) {
     new roundNumber = InSecondHalfOfRound() ? 1 : 0;
     
-    if (L4D2Direct_GetVSTankToSpawnThisRound(roundNumber)) {
-        PrintToChatAll("Tank spawn: %d%%", RoundToNearest(GetTankFlow(roundNumber)*100));
-    }
+    PrintToChatAll("Tank spawn: %d%%", RoundToNearest(GetTankFlow(roundNumber)*100));
     
     if (L4D2Direct_GetVSWitchToSpawnThisRound(roundNumber)) {
         PrintToChatAll("Witch spawn: %d%%", RoundToNearest(GetWitchFlow(roundNumber)*100));
@@ -64,9 +62,7 @@ public Action:BossCmd(client, args) {
     new iTankPercent = 0;
     new iWitchPercent = 0;
     
-    if (L4D2Direct_GetVSTankToSpawnThisRound(roundNumber)) {
-        iTankPercent = RoundToNearest(GetTankFlow(roundNumber)*100);
-    }
+    iTankPercent = RoundToNearest(GetTankFlow(roundNumber)*100);
     
     if (L4D2Direct_GetVSWitchToSpawnThisRound(roundNumber)) {
         iWitchPercent = RoundToNearest(GetWitchFlow(roundNumber)*100);
