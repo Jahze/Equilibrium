@@ -7,7 +7,6 @@
 #include <l4d2_direct>
 #include <l4d2lib>
 #include <l4d2util>
-#include <left4downtown>
 
 public Plugin:myinfo = {
     name = "L4D2 Boss Flow Announce",
@@ -47,7 +46,7 @@ public LeftStartAreaEvent( ) {
 
 
 public RoundStartEvent() {
-    AdjustBossFlow();
+    CreateTimer(0.5, AdjustBossFlow);
 }
 
 PrintBossPercents(client, iTankPercent, iWitchPercent) {
@@ -96,7 +95,7 @@ Float:GetWitchFlow(round) {
         ( Float:GetConVarInt(g_hVsBossBuffer) / L4D2Direct_GetMapMaxFlowDistance() );
 }
 
-AdjustBossFlow() {
+public Action:AdjustBossFlow(Handle:timer) {
     new iMinFlow = L4D2_GetMapValueInt("tank_ban_flow_min", -1);
     new iMaxFlow = L4D2_GetMapValueInt("tank_ban_flow_max", -1);
     
@@ -106,8 +105,8 @@ AdjustBossFlow() {
     }
 
     new iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
-    new Float:fMinFlow = Float:iMinFlow / 100.0;
-    new Float:fMaxFlow = Float:iMaxFlow / 100.0;
+    new Float:fMinFlow = Float:float(iMinFlow) / 100.0;
+    new Float:fMaxFlow = Float:float(iMaxFlow) / 100.0;
     new Float:fTankFlow = L4D2Direct_GetVSTankFlowPercent(iRoundNumber);
     
     // Is the tank in the allowed spawn range?    
