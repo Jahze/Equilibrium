@@ -10,7 +10,7 @@ Equilibrium 1.3
 * Increased the recharge timer for a jockey after a ledge hang to 10s (and prevent instant recharges).
 * Players who have already played the tank will not get a chance to be the tank again until all other player have had a turn.
 * Tanks no longer pass between players, their rage meter is reset once instead.
-* Grace period before losing frustration with the tank increased to 20 seconds.
+* Grace period before losing frustration with the tank increased to 25 seconds.
 
 
 
