@@ -9,6 +9,13 @@
 new Float:fLedgeHangInterval;
 new Handle:hCvarJockeyLedgeHang;
 
+public Plugin:myinfo = {
+    name = "L4D2 Jockey Ledge Hang Recharge",
+    author = "Jahze",
+    version = "1.0",
+    description = "Adds a cvar to adjust the recharge timer of a jockey after he ledge hangs a survivor."
+};
+
 public OnPluginStart() {
     hCvarJockeyLedgeHang = CreateConVar("z_leap_interval_post_ledge_hang", "10", "How long before a jockey can leap again after a ledge hang");
     HookConVarChange(hCvarJockeyLedgeHang, JockeyLedgeHangChange);
@@ -48,8 +55,6 @@ FixupJockeyTimer(client) {
         return;
     }
     
-    // XXX: Use net props to set this for the moment as StoreToAddress (and
-    // hence CTimer_Start from l4d2_direct) doesn't work.
     SetEntPropFloat(iEntity, Prop_Send, "m_timestamp", GetGameTime() + fLedgeHangInterval);
     SetEntPropFloat(iEntity, Prop_Send, "m_duration", fLedgeHangInterval);
 }
