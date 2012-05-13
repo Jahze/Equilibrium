@@ -109,7 +109,7 @@ public CarAlarmLogicRelayTriggered( const String:output[], caller, activator, Fl
         // If a car is turned off because of a tank punch or because it was
         // triggered the activator is the car itself. When the cars get
         // randomised the activator is the player who entered the trigger area.
-        if ( StrEqual(sClassName, "prop_alarm_car") ) {
+        if ( StrEqual(sClassName, "prop_car_alarm ") ) {
             return;
         }
     }
