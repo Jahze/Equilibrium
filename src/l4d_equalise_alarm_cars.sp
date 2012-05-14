@@ -7,7 +7,7 @@ public Plugin:myinfo =
 {
     name        = "L4D2 Equalise Alarm Cars",
     author      = "Jahze",
-    version     = "1.1",
+    version     = "1.2",
     description = "Make the alarmed car spawns the same for each team in versus"
 };
 
@@ -109,7 +109,7 @@ public CarAlarmLogicRelayTriggered( const String:output[], caller, activator, Fl
         // If a car is turned off because of a tank punch or because it was
         // triggered the activator is the car itself. When the cars get
         // randomised the activator is the player who entered the trigger area.
-        if ( StrEqual(sClassName, "prop_car_alarm ") ) {
+        if ( StrEqual(sClassName, "prop_car_alarm") ) {
             return;
         }
     }
