@@ -1,8 +1,6 @@
 #pragma semicolon 1
 
 #define L4D2UTIL_STOCKS_ONLY
-#define TEAM_SURVIVOR   2
-#define TEAM_INFECTED   3
 
 #include <sourcemod>
 #include <sdktools>
@@ -30,13 +28,11 @@ public OnPluginStart() {
 
 public Action:L4D_OnTryOfferingTankBot(tank_index, &bool:enterStatis) {
     if (!IsFakeClient(tank_index)) {
-
-        for (new i=1; i <= MaxClients; i++)
-        {
+        for (new i=1; i <= MaxClients; i++) {
             if (!IsClientInGame(i))
                 continue;
         
-            if (GetClientTeam(i) != TEAM_INFECTED)
+            if (!IsInfected(i))
                 continue;
 
             PrintHintText(i, "Rage Meter Refilled");
