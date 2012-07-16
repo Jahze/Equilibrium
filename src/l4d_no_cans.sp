@@ -3,7 +3,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define MAX_CAN_NAMES       3
+#define MAX_CAN_NAMES       4
 
 new bool:bNoCans = true;
 
@@ -12,19 +12,20 @@ new Handle:cvar_noCans;
 static const String:CAN_MODEL_NAMES[MAX_CAN_NAMES][] = {
     "models/props_junk/gascan001a.mdl",
     "models/props_junk/propanecanister001a.mdl",
-    "models/props_equipment/oxygentank01.mdl"
+    "models/props_equipment/oxygentank01.mdl",
+    "models/props_junk/explosive_box001.mdl"
 };
 
 public Plugin:myinfo =
 {
     name        = "L4D2 Remove Cans",
     author      = "Jahze",
-    version     = "0.1",
-    description = "Removes oxygen, propane and gas cans"
+    version     = "0.2",
+    description = "Removes oxygen, propane, gas cans, and fireworks"
 }
 
 public OnPluginStart() {
-    cvar_noCans = CreateConVar("l4d_no_cans", "1", "Removes oxygen, propane and gas cans", FCVAR_PLUGIN);
+    cvar_noCans = CreateConVar("l4d_no_cans", "1", "Removes oxygen, propane, gas cans, and fireworks", FCVAR_PLUGIN);
     HookConVarChange(cvar_noCans, NoCansChange);
     
     PluginEnable();
