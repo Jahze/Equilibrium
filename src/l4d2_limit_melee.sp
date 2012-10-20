@@ -37,7 +37,7 @@ public OnMapStart() {
 }
 
 public OnRoundStart() {
-    CreateTimer(10.0, RoundStartDelay);
+    CreateTimer(0.5, RoundStartDelay);
 }
 
 public Action:RoundStartDelay(Handle:timer) {
