@@ -11,17 +11,24 @@
 // a magic number of ~0.7s was always added to this.
 #define COOLDOWN_EXTRA_TIME 0.7
 
+// Sometimes the ability timer doesn't get reset if the timer interval is the
+// stagger time. Use an epsilon to set it slightly before the stagger is over.
+#define STAGGER_TIME_EPS 0.1
+
 new Handle:hMaxShovePenaltyCvar;
 new Handle:hShovePenaltyAmtCvar;
 new Handle:hPounceCrouchDelayCvar;
 new Handle:hMaxStaggerDurationCvar;
 new Handle:hLeapIntervalCvar;
+new Handle:hPenaltyIncreaseCvar;
+
+new g_iPenaltyIncrease;
 
 public Plugin:myinfo =
 {
     name        = "L4D2 M2 Control",
     author      = "Jahze",
-    version     = "1.0",
+    version     = "1.1",
     description = "Blocks instant repounces and gives maximum m2 penalty after a deadstop"
 }
 
@@ -32,6 +39,14 @@ public OnPluginStart() {
     hPounceCrouchDelayCvar = FindConVar("z_pounce_crouch_delay");
     hMaxStaggerDurationCvar = FindConVar("z_max_stagger_duration");
     hLeapIntervalCvar = FindConVar("z_leap_interval");
+
+    hPenaltyIncreaseCvar = CreateConVar("l4d2_deadstop_penalty", "6", "How much penalty gets added when you deadstop a hunter or jockey");
+    HookConVarChange(hPenaltyIncreaseCvar, PenaltyIncreaseChange);
+    g_iPenaltyIncrease = GetConVarInt(hPenaltyIncreaseCvar);
+}
+
+public PenaltyIncreaseChange(Handle:hCvar, const String:oldVal[], const String:newVal[]) {
+    g_iPenaltyIncrease = StringToInt(newVal);
 }
 
 public Action:OutSkilled(Handle:event, const String:name[], bool:dontBroadcast) {
@@ -44,14 +59,19 @@ public Action:OutSkilled(Handle:event, const String:name[], bool:dontBroadcast) 
     new L4D2_Infected:zClass = GetInfectedClass(shovee);
 
     if (zClass == L4D2Infected_Hunter || zClass == L4D2Infected_Jockey) {
-        L4D2Direct_SetShovePenalty(shover, GetConVarInt(hMaxShovePenaltyCvar));
+        new maxPenalty = GetConVarInt(hMaxShovePenaltyCvar);
+        new penalty = L4D2Direct_GetShovePenalty(shover);
 
-        new Float:time = GetGameTime();
-        new Float:nextShoveTime = time + GetConVarFloat(hShovePenaltyAmtCvar) + COOLDOWN_EXTRA_TIME;
-        L4D2Direct_SetNextShoveTime(shover, nextShoveTime);
+        penalty += g_iPenaltyIncrease;
+        if (penalty > maxPenalty) {
+            penalty = maxPenalty;
+        }
+
+        L4D2Direct_SetShovePenalty(shover, penalty);
+        L4D2Direct_SetNextShoveTime(shover, CalcNextShoveTime(penalty, maxPenalty));
 
         new Float:staggerTime = GetConVarFloat(hMaxStaggerDurationCvar);
-        CreateTimer(staggerTime, ResetAbilityTimer, shovee);
+        CreateTimer(staggerTime - STAGGER_TIME_EPS, ResetAbilityTimer, shovee);
     }
 }
 
@@ -70,7 +90,18 @@ public Action:ResetAbilityTimer(Handle:event, any:shovee) {
     if (! GetInfectedAbilityTimer(shovee, timestamp, duration))
         return;
 
-    if (time + recharge > timestamp)
-        SetInfectedAbilityTimer(shovee, time + recharge, recharge);
+    duration = time + recharge + STAGGER_TIME_EPS;
+    if (duration > timestamp)
+        SetInfectedAbilityTimer(shovee, duration, recharge);
+}
+
+static Float:CalcNextShoveTime(penalty, max) {
+    new Float:time = GetGameTime();
+    new Float:maxPenalty = float(max);
+    new Float:currentPenalty = float(penalty);
+    new Float:ratio = currentPenalty/maxPenalty;
+    new Float:maxTime = GetConVarFloat(hShovePenaltyAmtCvar);
+
+    return time + ratio*maxTime + COOLDOWN_EXTRA_TIME;
 }
 
