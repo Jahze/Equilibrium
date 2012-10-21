@@ -11,12 +11,13 @@
 public Plugin:myinfo = {
     name = "L4D2 Boss Flow Announce",
     author = "ProdigySim, Jahze, Stabby, CircleSquared",
-    version = "1.2",
+    version = "1.3.1t",
     description = "Announce boss flow percents!"
 };
 
 new iWitchPercent	= 0;
 new iTankPercent	= 0;
+new iRoundNumber	= 1;
 
 new Handle:g_hVsBossBuffer;
 new Handle:g_hVsBossFlowMax;
@@ -41,27 +42,15 @@ public OnPluginStart() {
 }
 
 public LeftStartAreaEvent() {
-    if(GetConVarBool(hCvarTankPercent)) {
-        if (iTankPercent) {
-            PrintToChatAll("\x01Tank spawn: [\x04%d%%\x01]", iTankPercent);
-        }
-        else {
-            PrintToChatAll("\x01Tank spawn: [\x04None\x01]");
-        }
-    }
-    if(GetConVarBool(hCvarWitchPercent)) {
-        if (iWitchPercent) {
-            PrintToChatAll("\x01Witch spawn: [\x04%d%%\x01]", iWitchPercent);
-        }
-        else {
-            PrintToChatAll("\x01Witch spawn: [\x04None\x01]");
-        }
+    for (new i = 1; i <= MaxClients; i++) {
+        PrintBossPercents(i);
     }
 }
 
 public RoundStartEvent() {
+//  iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
     CreateTimer(0.5, AdjustBossFlow);
-    CreateTimer(1.0, GetBossFlow);
+    CreateTimer(2.0, GetBossFlow);
 }
 
 PrintBossPercents(client) {
@@ -93,11 +82,10 @@ public Action:BossCmd(client, args) {
     for (new i = 1; i < MaxClients+1; i++) {
         if (IsClientConnected(i) && IsClientInGame(i) && L4D2_Team:GetClientTeam(i) == iTeam) {
             PrintBossPercents(i);
-            return Plugin_Handled;
         }
     }
 	
-    return Plugin_Continue;
+    return Plugin_Handled;
 }
 
 Float:GetTankFlow(round) {
@@ -119,7 +107,6 @@ public Action:AdjustBossFlow(Handle:timer) {
         return;
     }
 
-    new iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
     new Float:fMinFlow = Float:float(iMinFlow) / 100.0;
     new Float:fMaxFlow = Float:float(iMaxFlow) / 100.0;
     new Float:fTankFlow = L4D2Direct_GetVSTankFlowPercent(iRoundNumber);
@@ -147,8 +134,6 @@ public Action:AdjustBossFlow(Handle:timer) {
 }
 
 public Action:GetBossFlow(Handle:timer) {
-    new iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
-
     if (L4D2Direct_GetVSWitchToSpawnThisRound(iRoundNumber)) {
         iWitchPercent = RoundToNearest(GetWitchFlow(iRoundNumber)*100);
     }
