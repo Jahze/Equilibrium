@@ -1,8 +1,10 @@
+ 
 #pragma semicolon 1
 
 #include <sourcemod>
 #include <sdktools>
 #include <left4downtown>
+#include <colors>
 
 #define AWP_W_MODEL         "models/w_models/weapons/w_sniper_awp.mdl"
 #define AWP_V_MODEL         "models/v_models/v_snip_awp.mdl"
@@ -27,7 +29,7 @@ public Plugin:myinfo =
 {
     name        = "L4D2 Sniper",
     author      = "Jahze",
-    version     = "3.1",
+    version     = "3.0",
     description = "Plugin that allows limited pickups of AWP or scout"
 }
 
@@ -127,46 +129,58 @@ public Action:SniperWeaponDrop( Handle:event, const String:name[], bool:dontBroa
     GetEventString(event, "item", sSniperLastWeapon, sizeof(sSniperLastWeapon));
 }
 
-public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroadcast ) {
-    new client = GetClientOfUserId(GetEventInt(event, "userid"));
-    new weapon = GetPlayerWeaponSlot(client, 0);
+public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroadcast ) 
+{
+	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	new weapon = GetPlayerWeaponSlot(client, 0);
     
-    decl String:sSniperName[64];
-    SniperWeaponName(sSniperName, sizeof(sSniperName));
+	decl String:sSniperName[64];
+	SniperWeaponName(sSniperName, sizeof(sSniperName));
     
-    if ( !IsValidEdict(weapon) ) {
-        return;
-    }
+	if ( !IsValidEdict(weapon) ) {
+		return;
+	}
     
-    decl String:weaponName[64];
-    GetEdictClassname(weapon, weaponName, sizeof(weaponName));
+	decl String:weaponName[64];
+	GetEdictClassname(weapon, weaponName, sizeof(weaponName));
     
-    // Player picked up a sniper
-    if ( StrEqual(weaponName, sSniperName) ) {
-        if ( SniperCount(client) >= iSniperLimit ) {
-            RemovePlayerItem(client, weapon);
-            PrintToChat(client, "[Sniper] Maximum of %d sniper(s) per team.", iSniperLimit);
+	// Player picked up a sniper
+	if ( StrEqual(weaponName, sSniperName) ) 
+	{
+		if ( SniperCount(client) >= iSniperLimit ) 
+		{
+			RemovePlayerItem(client, weapon);
+			if ( iSniperLimit == 1 )
+			{
+				CPrintToChat(client, "{default}[{blue}Sniper{default}] Maximum of {blue}%d Sniper {default}per team.", iSniperLimit);
+			}
+			else
+			{
+				CPrintToChat(client, "{default}[{blue}Sniper{default}] Maximum of {blue}%d Snipers {default}per team.", iSniperLimit);
+			}
             
-            if ( client == iSniperLastClient ) {
-                if ( IsValidEdict(iSniperLastWeapon) ) {
-                    AcceptEntityInput(iSniperLastWeapon, "Kill");
+			if ( client == iSniperLastClient ) 
+			{
+				if ( IsValidEdict(iSniperLastWeapon) ) 
+				{
+					AcceptEntityInput(iSniperLastWeapon, "Kill");
                     
-                    new giveFlags = GetCommandFlags("give");
-                    SetCommandFlags("give", giveFlags ^ FCVAR_CHEAT);
+					new giveFlags = GetCommandFlags("give");
+					SetCommandFlags("give", giveFlags ^ FCVAR_CHEAT);
                     
-                    decl String:giveCommand[128];
-                    Format(giveCommand, sizeof(giveCommand), "give %s", sSniperLastWeapon);
-                    FakeClientCommand(client, giveCommand);
+					decl String:giveCommand[128];
+					Format(giveCommand, sizeof(giveCommand), "give %s", sSniperLastWeapon);
+					FakeClientCommand(client, giveCommand);
                     
-                    SetCommandFlags("give", giveFlags);
-                }
-            }
-        }
-    }
+					SetCommandFlags("give", giveFlags);
+				}
+			}
+		}
+	}
     
-    iSniperLastWeapon = -1;
-    iSniperLastClient = -1;
-    sSniperLastWeapon[0] = 0;
+	iSniperLastWeapon = -1;
+	iSniperLastClient = -1;
+	sSniperLastWeapon[0] = 0;
 }
 
 SniperVModel(String:buf[], len) {
