@@ -11,7 +11,7 @@ public Plugin:myinfo =
 {
     name        = "L4D2 Weapon Attributes",
     author      = "Jahze",
-    version     = "1.0",
+    version     = "1.1",
     description = "Allowing tweaking of the attributes of all weapons"
 };
 
