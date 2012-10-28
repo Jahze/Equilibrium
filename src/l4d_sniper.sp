@@ -1,8 +1,10 @@
+ 
 #pragma semicolon 1
 
 #include <sourcemod>
 #include <sdktools>
 #include <left4downtown>
+#include <colors>
 
 #define AWP_W_MODEL         "models/w_models/weapons/w_sniper_awp.mdl"
 #define AWP_V_MODEL         "models/v_models/v_snip_awp.mdl"
@@ -127,7 +129,8 @@ public Action:SniperWeaponDrop( Handle:event, const String:name[], bool:dontBroa
     GetEventString(event, "item", sSniperLastWeapon, sizeof(sSniperLastWeapon));
 }
 
-public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroadcast ) {
+public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroadcast ) 
+{
     new client = GetClientOfUserId(GetEventInt(event, "userid"));
     new weapon = GetPlayerWeaponSlot(client, 0);
     
@@ -142,13 +145,24 @@ public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroad
     GetEdictClassname(weapon, weaponName, sizeof(weaponName));
     
     // Player picked up a sniper
-    if ( StrEqual(weaponName, sSniperName) ) {
-        if ( SniperCount(client) >= iSniperLimit ) {
+    if ( StrEqual(weaponName, sSniperName) ) 
+    {
+        if ( SniperCount(client) >= iSniperLimit ) 
+        {
             RemovePlayerItem(client, weapon);
-            PrintToChat(client, "[Sniper] Maximum of %d sniper(s) per team.", iSniperLimit);
+            if ( iSniperLimit == 1 )
+            {
+                CPrintToChat(client, "{default}[{blue}Sniper{default}] Maximum of {blue}%d Sniper {default}per team.", iSniperLimit);
+            }
+            else
+            {
+                CPrintToChat(client, "{default}[{blue}Sniper{default}] Maximum of {blue}%d Snipers {default}per team.", iSniperLimit);
+            }
             
-            if ( client == iSniperLastClient ) {
-                if ( IsValidEdict(iSniperLastWeapon) ) {
+            if ( client == iSniperLastClient ) 
+            {
+                if ( IsValidEdict(iSniperLastWeapon) ) 
+                {
                     AcceptEntityInput(iSniperLastWeapon, "Kill");
                     
                     new giveFlags = GetCommandFlags("give");
@@ -194,4 +208,4 @@ SniperWeaponName(String:buf[], len) {
     else {
         strcopy(buf, len, SCOUT_WEAPON_NAME);
     }
-}
+    
