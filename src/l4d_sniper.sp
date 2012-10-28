@@ -196,3 +196,4 @@ SniperWeaponName(String:buf[], len) {
         strcopy(buf, len, SCOUT_WEAPON_NAME);
     }
 }
+    
