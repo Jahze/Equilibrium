@@ -10,19 +10,28 @@
 
 public Plugin:myinfo = {
     name = "L4D2 Boss Flow Announce",
-    author = "ProdigySim, Jahze",
-    version = "1.0",
+    author = "ProdigySim, Jahze, Stabby, CircleSquared",
+    version = "1.4",
     description = "Announce boss flow percents!"
 };
+
+new iWitchPercent	= 0;
+new iTankPercent	= 0;
+new iRoundNumber	= 1;
 
 new Handle:g_hVsBossBuffer;
 new Handle:g_hVsBossFlowMax;
 new Handle:g_hVsBossFlowMin;
+new Handle:hCvarTankPercent;
+new Handle:hCvarWitchPercent;
 
 public OnPluginStart() {
     g_hVsBossBuffer = FindConVar("versus_boss_buffer");
     g_hVsBossFlowMax = FindConVar("versus_boss_flow_max");
     g_hVsBossFlowMin = FindConVar("versus_boss_flow_min");
+    
+    hCvarTankPercent = CreateConVar("l4d_tank_percent", "1", "Display Tank flow percentage in chat", FCVAR_PLUGIN);
+    hCvarWitchPercent = CreateConVar("l4d_witch_percent", "1", "Display Witch flow percentage in chat", FCVAR_PLUGIN);
     
     RegConsoleCmd("sm_boss", BossCmd);
     RegConsoleCmd("sm_tank", BossCmd);
@@ -32,53 +41,55 @@ public OnPluginStart() {
     HookEvent("round_start", EventHook:RoundStartEvent, EventHookMode_PostNoCopy);
 }
 
-public LeftStartAreaEvent( ) {
-    new roundNumber = InSecondHalfOfRound() ? 1 : 0;
-    
-    PrintToChatAll("Tank spawn: %d%%", RoundToNearest(GetTankFlow(roundNumber)*100));
-    
-    if (L4D2Direct_GetVSWitchToSpawnThisRound(roundNumber)) {
-        PrintToChatAll("Witch spawn: %d%%", RoundToNearest(GetWitchFlow(roundNumber)*100));
+public LeftStartAreaEvent() {
+    for (new i = 1; i <= MaxClients; i++) {
+        PrintBossPercents(i);
     }
 }
-
 
 public RoundStartEvent() {
-    CreateTimer(0.5, AdjustBossFlow);
+//  iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
+	CreateTimer(0.5, AdjustBossFlow);
+//  CreateTimer(2.0, GetBossFlow);
 }
 
-PrintBossPercents(client, iTankPercent, iWitchPercent) {
-    if (iTankPercent != 0) {
-        ReplyToCommand(client, "Tank spawn: %d%%", iTankPercent);
+public OnMapStart() {
+    CreateTimer(5.0, GetBossFlow);
+}
+
+PrintBossPercents(client) {
+    if(GetConVarBool(hCvarTankPercent)) {
+        if (iTankPercent) {
+            PrintToChat(client, "\x01Tank spawn: [\x04%d%%\x01]", iTankPercent);
+        }
+        else {
+            PrintToChat(client, "\x01Tank spawn: [\x04None\x01]");
+        }
     }
-    
-    if (iWitchPercent != 0) {
-        ReplyToCommand(client, "Witch spawn: %d%%", iWitchPercent);
+    if(GetConVarBool(hCvarWitchPercent)) {
+        if (iWitchPercent) {
+            PrintToChat(client, "\x01Witch spawn: [\x04%d%%\x01]", iWitchPercent);
+        }
+        else {
+            PrintToChat(client, "\x01Witch spawn: [\x04None\x01]");
+        }
     }
 }
 
-public Action:BossCmd(client, args) {
-    new roundNumber = InSecondHalfOfRound() ? 1 : 0;
-    new iTankPercent = 0;
-    new iWitchPercent = 0;
-    
-    iTankPercent = RoundToNearest(GetTankFlow(roundNumber)*100);
-    
-    if (L4D2Direct_GetVSWitchToSpawnThisRound(roundNumber)) {
-        iWitchPercent = RoundToNearest(GetWitchFlow(roundNumber)*100);
-    }
-    
+public Action:BossCmd(client, args) {    
     new L4D2_Team:iTeam = L4D2_Team:GetClientTeam(client);
     if (iTeam == L4D2Team_Spectator) {
-        PrintBossPercents(client, iTankPercent, iWitchPercent);
-        return;
+        PrintBossPercents(client);
+        return Plugin_Handled;
     }
     
     for (new i = 1; i < MaxClients+1; i++) {
         if (IsClientConnected(i) && IsClientInGame(i) && L4D2_Team:GetClientTeam(i) == iTeam) {
-            PrintBossPercents(i, iTankPercent, iWitchPercent);
+            PrintBossPercents(i);
         }
     }
+	
+    return Plugin_Handled;
 }
 
 Float:GetTankFlow(round) {
@@ -100,12 +111,11 @@ public Action:AdjustBossFlow(Handle:timer) {
         return;
     }
 
-    new iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
     new Float:fMinFlow = Float:float(iMinFlow) / 100.0;
     new Float:fMaxFlow = Float:float(iMaxFlow) / 100.0;
     new Float:fTankFlow = L4D2Direct_GetVSTankFlowPercent(iRoundNumber);
     
-    // Is the tank in the allowed spawn range?    
+    // Is the tank in the allowed spawn range?
     if (fTankFlow < fMinFlow || fTankFlow > fMaxFlow) {
         return;
     }
@@ -127,3 +137,17 @@ public Action:AdjustBossFlow(Handle:timer) {
     L4D2Direct_SetVSTankFlowPercent(1, fFlow);
 }
 
+public Action:GetBossFlow(Handle:timer) {
+    if (L4D2Direct_GetVSWitchToSpawnThisRound(iRoundNumber)) {
+        iWitchPercent = RoundToNearest(GetWitchFlow(iRoundNumber)*100);
+    }
+    else {
+        iWitchPercent = 0;
+    }
+    if (L4D2Direct_GetVSTankToSpawnThisRound(iRoundNumber)) {
+        iTankPercent = RoundToNearest(GetTankFlow(iRoundNumber)*100);
+    }
+    else {
+        iTankPercent = 0;
+    }
+}
