@@ -32,7 +32,6 @@ public ClearSecondarys(Handle:event, const String:name[], bool:dontBroadcast) {
 }
 
 public Action:PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast) {
-    // TODO: does this happen for every common? if so maybe SDKHook players
     new client = GetClientOfUserId(GetEventInt(event, "userid"));
     if (client <= 0 || client > MaxClients+1) {
         return;
