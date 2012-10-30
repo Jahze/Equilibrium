@@ -11,13 +11,12 @@
 public Plugin:myinfo = {
     name = "L4D2 Boss Flow Announce",
     author = "ProdigySim, Jahze, Stabby, CircleSquared",
-    version = "1.4",
+    version = "1.5",
     description = "Announce boss flow percents!"
 };
 
-new iWitchPercent	= 0;
-new iTankPercent	= 0;
-new iRoundNumber	= 1;
+new iWitchPercent   = 0;
+new iTankPercent    = 0;
 
 new Handle:g_hVsBossBuffer;
 new Handle:g_hVsBossFlowMax;
@@ -43,18 +42,14 @@ public OnPluginStart() {
 
 public LeftStartAreaEvent() {
     for (new i = 1; i <= MaxClients; i++) {
-        PrintBossPercents(i);
+        if (IsClientConnected(i) && IsClientInGame(i)) {
+            PrintBossPercents(i);
+        }
     }
 }
 
 public RoundStartEvent() {
-//  iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
-	CreateTimer(0.5, AdjustBossFlow);
-//  CreateTimer(2.0, GetBossFlow);
-}
-
-public OnMapStart() {
-    CreateTimer(5.0, GetBossFlow);
+    CreateTimer(0.5, AdjustBossFlow);
 }
 
 PrintBossPercents(client) {
@@ -76,7 +71,7 @@ PrintBossPercents(client) {
     }
 }
 
-public Action:BossCmd(client, args) {    
+public Action:BossCmd(client, args) {
     new L4D2_Team:iTeam = L4D2_Team:GetClientTeam(client);
     if (iTeam == L4D2Team_Spectator) {
         PrintBossPercents(client);
@@ -88,7 +83,7 @@ public Action:BossCmd(client, args) {
             PrintBossPercents(i);
         }
     }
-	
+
     return Plugin_Handled;
 }
 
@@ -103,6 +98,8 @@ Float:GetWitchFlow(round) {
 }
 
 public Action:AdjustBossFlow(Handle:timer) {
+    SaveBossFlow();
+
     new iMinFlow = L4D2_GetMapValueInt("tank_ban_flow_min", -1);
     new iMaxFlow = L4D2_GetMapValueInt("tank_ban_flow_max", -1);
     
@@ -111,6 +108,7 @@ public Action:AdjustBossFlow(Handle:timer) {
         return;
     }
 
+    new iRoundNumber = InSecondHalfOfRound() ? 1 : 0;
     new Float:fMinFlow = Float:float(iMinFlow) / 100.0;
     new Float:fMaxFlow = Float:float(iMaxFlow) / 100.0;
     new Float:fTankFlow = L4D2Direct_GetVSTankFlowPercent(iRoundNumber);
@@ -135,19 +133,27 @@ public Action:AdjustBossFlow(Handle:timer) {
     
     L4D2Direct_SetVSTankFlowPercent(0, fFlow);
     L4D2Direct_SetVSTankFlowPercent(1, fFlow);
+    iTankPercent = RoundToNearest(fFlow*100.0);
 }
 
-public Action:GetBossFlow(Handle:timer) {
-    if (L4D2Direct_GetVSWitchToSpawnThisRound(iRoundNumber)) {
-        iWitchPercent = RoundToNearest(GetWitchFlow(iRoundNumber)*100);
-    }
-    else {
+static SaveBossFlow() {
+    if (! InSecondHalfOfRound()) {
         iWitchPercent = 0;
-    }
-    if (L4D2Direct_GetVSTankToSpawnThisRound(iRoundNumber)) {
-        iTankPercent = RoundToNearest(GetTankFlow(iRoundNumber)*100);
+        iTankPercent = 0;
+
+        if (L4D2Direct_GetVSWitchToSpawnThisRound(0)) {
+            iWitchPercent = RoundToNearest(GetWitchFlow(0)*100.0);
+        }
+        if (L4D2Direct_GetVSTankToSpawnThisRound(0)) {
+            iTankPercent = RoundToNearest(GetTankFlow(0)*100.0);
+        }
     }
     else {
-        iTankPercent = 0;
+        if (iWitchPercent != 0) {
+            iWitchPercent = RoundToNearest(GetWitchFlow(1)*100.0);
+        }
+        if (iTankPercent != 0) {
+            iTankPercent = RoundToNearest(GetTankFlow(1)*100.0);
+        }
     }
 }
