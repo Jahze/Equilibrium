@@ -4,12 +4,13 @@
 #include <sdkhooks>
 #include <sdktools>
 
-#define MAX_CAN_NAMES       3
+#define MAX_CAN_NAMES       4
 
 static const String:CAN_MODEL_NAMES[MAX_CAN_NAMES][] = {
     "models/props_junk/gascan001a.mdl",
     "models/props_junk/propanecanister001a.mdl",
-    "models/props_equipment/oxygentank01.mdl"
+    "models/props_equipment/oxygentank01.mdl",
+    "models/props_junk/explosive_box001.mdl"
 };
 
 public Plugin:myinfo =
@@ -17,7 +18,7 @@ public Plugin:myinfo =
     name        = "L4D2 Remove Cans",
     author      = "Jahze",
     version     = "1.0",
-    description = "Removes oxygen, propane and gas cans"
+    description = "Removes oxygen, propane, gas cans, and fireworks"
 }
 
 public OnPluginStart() {

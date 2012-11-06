@@ -3,6 +3,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <left4downtown>
+#include <colors>
 
 #define AWP_W_MODEL         "models/w_models/weapons/w_sniper_awp.mdl"
 #define AWP_V_MODEL         "models/v_models/v_snip_awp.mdl"
@@ -145,7 +146,7 @@ public Action:SniperPlayerUse( Handle:event, const String:name[], bool:dontBroad
     if ( StrEqual(weaponName, sSniperName) ) {
         if ( SniperCount(client) >= iSniperLimit ) {
             RemovePlayerItem(client, weapon);
-            PrintToChat(client, "[Sniper] Maximum of %d sniper(s) per team.", iSniperLimit);
+            CPrintToChat(client, "{default}[{blue}Sniper{default}] Maximum of {blue}%d Snipers {default}per team.", iSniperLimit);
             
             if ( client == iSniperLastClient ) {
                 if ( IsValidEdict(iSniperLastWeapon) ) {

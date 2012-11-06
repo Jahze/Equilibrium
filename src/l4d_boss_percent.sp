@@ -10,42 +10,41 @@
 
 public Plugin:myinfo = {
     name = "L4D2 Boss Flow Announce",
-    author = "ProdigySim, Jahze",
-    version = "1.1",
+    author = "ProdigySim, Jahze, Stabby, CircleSquared",
+    version = "1.5",
     description = "Announce boss flow percents!"
 };
 
-new g_iTankPercent;
-new g_iWitchPercent;
-new bool:bLateLoad = false;
+new iWitchPercent   = 0;
+new iTankPercent    = 0;
 
 new Handle:g_hVsBossBuffer;
 new Handle:g_hVsBossFlowMax;
 new Handle:g_hVsBossFlowMin;
+new Handle:hCvarTankPercent;
+new Handle:hCvarWitchPercent;
 
 public OnPluginStart() {
     g_hVsBossBuffer = FindConVar("versus_boss_buffer");
     g_hVsBossFlowMax = FindConVar("versus_boss_flow_max");
     g_hVsBossFlowMin = FindConVar("versus_boss_flow_min");
-
+    
+    hCvarTankPercent = CreateConVar("l4d_tank_percent", "1", "Display Tank flow percentage in chat", FCVAR_PLUGIN);
+    hCvarWitchPercent = CreateConVar("l4d_witch_percent", "1", "Display Witch flow percentage in chat", FCVAR_PLUGIN);
+    
     RegConsoleCmd("sm_boss", BossCmd);
     RegConsoleCmd("sm_tank", BossCmd);
     RegConsoleCmd("sm_witch", BossCmd);
-
+    
     HookEvent("player_left_start_area", EventHook:LeftStartAreaEvent, EventHookMode_PostNoCopy);
     HookEvent("round_start", EventHook:RoundStartEvent, EventHookMode_PostNoCopy);
-
-    if (bLateLoad)
-        SaveBossPercents();
 }
 
-public APLRes:AskPluginLoad2(Handle:plugin, bool:late, String:error[], err_max) {
-    bLateLoad = late;
-}
-
-public LeftStartAreaEvent( ) {
-    for (new i = 0; i < MaxClients+1; ++i) {
-        PrintBossPercents(i);
+public LeftStartAreaEvent() {
+    for (new i = 1; i <= MaxClients; i++) {
+        if (IsClientConnected(i) && IsClientInGame(i)) {
+            PrintBossPercents(i);
+        }
     }
 }
 
@@ -54,18 +53,21 @@ public RoundStartEvent() {
 }
 
 PrintBossPercents(client) {
-    if (g_iTankPercent != 0) {
-        PrintToChat(client, "\x01Tank spawn: [\x04%d%%\x01]", g_iTankPercent);
+    if(GetConVarBool(hCvarTankPercent)) {
+        if (iTankPercent) {
+            PrintToChat(client, "\x01Tank spawn: [\x04%d%%\x01]", iTankPercent);
+        }
+        else {
+            PrintToChat(client, "\x01Tank spawn: [\x04None\x01]");
+        }
     }
-    else {
-        PrintToChat(client, "\x01Tank spawn: [\x04None\x01]", g_iTankPercent);
-    }
-
-    if (g_iWitchPercent != 0) {
-        PrintToChat(client, "\x01Witch spawn: [\x04%d%%\x01]", g_iWitchPercent);
-    }
-    else {
-        PrintToChat(client, "\x01Witch spawn: [\x04None\x01]", g_iWitchPercent);
+    if(GetConVarBool(hCvarWitchPercent)) {
+        if (iWitchPercent) {
+            PrintToChat(client, "\x01Witch spawn: [\x04%d%%\x01]", iWitchPercent);
+        }
+        else {
+            PrintToChat(client, "\x01Witch spawn: [\x04None\x01]");
+        }
     }
 }
 
@@ -73,14 +75,16 @@ public Action:BossCmd(client, args) {
     new L4D2_Team:iTeam = L4D2_Team:GetClientTeam(client);
     if (iTeam == L4D2Team_Spectator) {
         PrintBossPercents(client);
-        return;
+        return Plugin_Handled;
     }
-
+    
     for (new i = 1; i < MaxClients+1; i++) {
         if (IsClientConnected(i) && IsClientInGame(i) && L4D2_Team:GetClientTeam(i) == iTeam) {
             PrintBossPercents(i);
         }
     }
+
+    return Plugin_Handled;
 }
 
 Float:GetTankFlow(round) {
@@ -94,11 +98,11 @@ Float:GetWitchFlow(round) {
 }
 
 public Action:AdjustBossFlow(Handle:timer) {
-    SaveBossPercents();
+    SaveBossFlow();
 
     new iMinFlow = L4D2_GetMapValueInt("tank_ban_flow_min", -1);
     new iMaxFlow = L4D2_GetMapValueInt("tank_ban_flow_max", -1);
-
+    
     // Check inputs exist and are sensible
     if (iMinFlow == -1 || iMaxFlow == -1 || iMaxFlow < iMinFlow) {
         return;
@@ -109,51 +113,47 @@ public Action:AdjustBossFlow(Handle:timer) {
     new Float:fMaxFlow = Float:float(iMaxFlow) / 100.0;
     new Float:fTankFlow = L4D2Direct_GetVSTankFlowPercent(iRoundNumber);
     
-    // Is the tank in the allowed spawn range?    
+    // Is the tank in the allowed spawn range?
     if (fTankFlow < fMinFlow || fTankFlow > fMaxFlow) {
         return;
     }
-
+    
     new Float:fCvarMaxFlow = GetConVarFloat(g_hVsBossFlowMax);
     new Float:fCvarMinFlow = GetConVarFloat(g_hVsBossFlowMin);
     new Float:fCvarFlowRange = fCvarMaxFlow - fCvarMinFlow;
     
     fMinFlow = fMinFlow < fCvarMinFlow ? fCvarMinFlow : fMinFlow;
     fMaxFlow = fMaxFlow > fCvarMaxFlow ? fCvarMaxFlow : fMaxFlow;
-
+    
     // XXX: Spawn the tank between the allowed min and max cutting out the
     // banned area
     new Float:fFlowRange = fMaxFlow - fMinFlow;
     new Float:fFlow = fCvarMinFlow + GetRandomFloat(0.0, fCvarFlowRange-fFlowRange);
     fFlow = fFlow >= fMinFlow ? fFlow + fFlowRange : fFlow;
-
+    
     L4D2Direct_SetVSTankFlowPercent(0, fFlow);
     L4D2Direct_SetVSTankFlowPercent(1, fFlow);
-
-    g_iTankPercent = RoundToNearest(fFlow*100.0);
+    iTankPercent = RoundToNearest(fFlow*100.0);
 }
 
-static SaveBossPercents() {
+static SaveBossFlow() {
     if (! InSecondHalfOfRound()) {
-        g_iTankPercent = 0;
-        g_iWitchPercent = 0;
-
-        if (L4D2Direct_GetVSTankToSpawnThisRound(0)) {
-            g_iTankPercent = RoundToNearest(GetTankFlow(0)*100.0);
-        }
+        iWitchPercent = 0;
+        iTankPercent = 0;
 
         if (L4D2Direct_GetVSWitchToSpawnThisRound(0)) {
-            g_iWitchPercent = RoundToNearest(GetWitchFlow(0)*100.0);
+            iWitchPercent = RoundToNearest(GetWitchFlow(0)*100.0);
+        }
+        if (L4D2Direct_GetVSTankToSpawnThisRound(0)) {
+            iTankPercent = RoundToNearest(GetTankFlow(0)*100.0);
         }
     }
     else {
-        if (g_iTankPercent != 0) {
-            g_iTankPercent = RoundToNearest(GetTankFlow(1)*100.0);
+        if (iWitchPercent != 0) {
+            iWitchPercent = RoundToNearest(GetWitchFlow(1)*100.0);
         }
-
-        if (g_iWitchPercent != 0) {
-            g_iWitchPercent = RoundToNearest(GetWitchFlow(1)*100.0);
+        if (iTankPercent != 0) {
+            iTankPercent = RoundToNearest(GetTankFlow(1)*100.0);
         }
     }
 }
-
