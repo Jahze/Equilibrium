@@ -11,7 +11,7 @@
 public Plugin:myinfo = {
     name = "L4D2 Boss Flow Announce",
     author = "ProdigySim, Jahze, Stabby, CircleSquared",
-    version = "1.5",
+    version = "1.6",
     description = "Announce boss flow percents!"
 };
 
@@ -21,6 +21,7 @@ new iTankPercent    = 0;
 new Handle:g_hVsBossBuffer;
 new Handle:g_hVsBossFlowMax;
 new Handle:g_hVsBossFlowMin;
+new Handle:hCvarPrintToEveryone;
 new Handle:hCvarTankPercent;
 new Handle:hCvarWitchPercent;
 
@@ -29,6 +30,7 @@ public OnPluginStart() {
     g_hVsBossFlowMax = FindConVar("versus_boss_flow_max");
     g_hVsBossFlowMin = FindConVar("versus_boss_flow_min");
     
+    hCvarPrintToEveryone = CreateConVar("l4d_global_percent", "1", "Display boss percentages to entire team when using commands", FCVAR_PLUGIN);
     hCvarTankPercent = CreateConVar("l4d_tank_percent", "1", "Display Tank flow percentage in chat", FCVAR_PLUGIN);
     hCvarWitchPercent = CreateConVar("l4d_witch_percent", "1", "Display Witch flow percentage in chat", FCVAR_PLUGIN);
     
@@ -78,10 +80,15 @@ public Action:BossCmd(client, args) {
         return Plugin_Handled;
     }
     
-    for (new i = 1; i < MaxClients+1; i++) {
-        if (IsClientConnected(i) && IsClientInGame(i) && L4D2_Team:GetClientTeam(i) == iTeam) {
-            PrintBossPercents(i);
+    if (GetConVarBool(hCvarPrintToEveryone)) {
+        for (new i = 1; i < MaxClients+1; i++) {
+            if (IsClientConnected(i) && IsClientInGame(i) && L4D2_Team:GetClientTeam(i) == iTeam) {
+                PrintBossPercents(i);
+            }
         }
+    }
+    else {
+        PrintBossPercents(client);
     }
 
     return Plugin_Handled;
