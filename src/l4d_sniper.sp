@@ -13,8 +13,6 @@
 #define SCOUT_V_MODEL       "models/v_models/v_snip_scout.mdl"
 #define SCOUT_WEAPON_NAME   "weapon_sniper_scout"
 
-new bool:bHooked;
-
 new iSniperLimit        = 1;
 new iSniperLastWeapon   = -1;
 new iSniperLastClient   = -1;
@@ -28,7 +26,7 @@ public Plugin:myinfo =
 {
     name        = "L4D2 Sniper",
     author      = "Jahze",
-    version     = "3.1",
+    version     = "3.2",
     description = "Plugin that allows limited pickups of AWP or scout"
 }
 
@@ -41,35 +39,17 @@ public OnPluginStart() {
     
     iSniperLimit = GetConVarInt(cvar_sniperLimit);
     GetConVarString(cvar_sniperType, sSniperType, sizeof(sSniperType));
-    
-    bHooked  = false;
-}
 
-public OnPluginEnd() {
-    PluginDisable();
+    PluginEnable();
 }
 
 public OnMapStart() {
     PrecacheSniper();
-    PluginEnable();
-}
-
-PluginDisable() {
-    if ( bHooked ) {
-        UnhookEvent("player_use", SniperPlayerUse);
-        UnhookEvent("weapon_drop", SniperWeaponDrop);
-        
-        bHooked  = false;
-    }
 }
 
 PluginEnable() {
-    if ( !bHooked ) {
-        HookEvent("player_use", SniperPlayerUse);
-        HookEvent("weapon_drop", SniperWeaponDrop);
-        
-        bHooked = true;
-    }
+    HookEvent("player_use", SniperPlayerUse);
+    HookEvent("weapon_drop", SniperWeaponDrop);
 }
 
 PrecacheSniper() {
