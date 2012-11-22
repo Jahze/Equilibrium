@@ -14,7 +14,7 @@ public Plugin:myinfo =
 {
     name        = "L4D2 Limit Magnum",
     author      = "Jahze",
-    version     = "1.0",
+    version     = "1.1",
     description = "Limits the number of magnums per weapon spawn"
 }
 
@@ -23,10 +23,6 @@ public OnPluginStart() {
     HookConVarChange(cvar_magnumLimit, MagnumLimitChange);
     
     PluginEnable();
-}
-
-public OnPluginEnd() {
-    PluginDisable();
 }
 
 public MagnumLimitChange( Handle:cvar, const String:oldValue[], const String:newValue[] ) {
@@ -42,10 +38,6 @@ public MagnumLimitChange( Handle:cvar, const String:oldValue[], const String:new
 
 PluginEnable() {
     HookEvent("round_start", MagnumLimitRoundStart);
-}
-
-PluginDisable() {
-    UnhookEvent("round_start", MagnumLimitRoundStart);
 }
 
 public Action:MagnumLimitRoundStart( Handle:event, const String:name[], bool:dontBroadcast ) {
